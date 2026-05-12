@@ -224,7 +224,7 @@ body { font-family: 'Afacad', sans-serif; background: #f0f4f8; color: #1a2e3b; f
     <div class="card space-y-4">
       <div>
         <p class="font-bold text-[#1a3a5c] mb-1">Musik Latar</p>
-        <p class="text-sm text-[#6a8898]">Maks 700KB (disarankan pakai URL).</p>
+        <p class="text-sm text-[#6a8898]">Upload langsung dari komputer (Maks 10MB).</p>
       </div>
       <div id="currentMusicBox" style="display:none" class="p-3 bg-blue-50 rounded-xl">
         <p class="text-xs font-semibold text-[#4A7DB5] mb-1">Aktif sekarang:</p>
@@ -241,7 +241,7 @@ body { font-family: 'Afacad', sans-serif; background: #f0f4f8; color: #1a2e3b; f
         <button onclick="clearMusicFile()" class="text-sm text-red-500 font-semibold">✕</button>
       </div>
       <div class="space-y-2">
-        <p class="text-sm font-semibold text-[#1a3a5c]">Atau masukkan URL MP3:</p>
+        <p class="text-sm font-semibold text-[#1a3a5c]">Atau masukkan URL MP3 langsung:</p>
         <input type="url" id="musicUrl" class="input" placeholder="https://example.com/musik.mp3">
       </div>
       <div id="musicPreviewBox" style="display:none" class="p-3 bg-blue-50 rounded-xl">
@@ -287,15 +287,13 @@ const SUPABASE_URL = 'https://usgqptxcpudatklkhucs.supabase.co';
 const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ3FwdHhjcHVkYXRrbGtodWNzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjU4OTYzMywiZXhwIjoyMDkyMTY1NjMzfQ.MC_-ZzW5KZNdArDZiv_5GHQgHq2OvyB1XvYqrQVSmNY'; 
 
 let db = null; 
-
-// PERBAIKAN LINK: Menggunakan '/' agar link ke tamu menjadi domain.com/?to=Nama (bukan index.html)
 const BASE = window.location.origin + '/';
 
 /* ── LOGIN SYSTEM ── */
 const ADMIN_PASSWORD = 'admin123'; 
 
 async function initDatabase() {
-  if (!window.supabase) throw new Error('Supabase JS tidak ditemukan. Pastikan script CDN sudah termuat.');
+  if (!window.supabase) throw new Error('Supabase JS tidak ditemukan.');
   db = supabase.createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
   const { data, error } = await db.from('rsvp').select('id').limit(1);
   if (error) throw error;
@@ -507,11 +505,11 @@ async function importCsv() {
 
 function downloadTemplate() {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['Nome,NoHP\nBudi Santoso,08123456789\nSiti Rahayu,08987654321'],{type:'text/csv'}));
+  a.href = URL.createObjectURL(new Blob(['Nama,NoHP\nBudi Santoso,08123456789\nSiti Rahayu,08987654321'],{type:'text/csv'}));
   a.download = 'template_tamu.csv'; a.click();
 }
 
-/* ── MUSIC ── */
+/* ── MUSIC (UPDATED: SUPPORT UP TO 10MB & SUPABASE STORAGE) ── */
 let musicBlob = null;
 const musicDrop = document.getElementById('musicDrop');
 musicDrop.addEventListener('dragover', e => { e.preventDefault(); musicDrop.classList.add('over'); });
@@ -522,7 +520,7 @@ function handleMusicFile(input) { if(input.files[0]) setMusicFile(input.files[0]
 
 function setMusicFile(file) {
   if (!file.type.startsWith('audio/')) { toast('Hanya file audio'); return; }
-  if (file.size > 700000) { toast('File terlalu besar (Maks 700KB). Gunakan URL eksternal.'); return; }
+  if (file.size > 10000000) { toast('File terlalu besar (Maks 10MB)'); return; } // Limit 10MB
   musicBlob = file;
   document.getElementById('musicFileName').textContent = file.name;
   document.getElementById('musicFileInfo').style.display = 'flex';
@@ -551,14 +549,56 @@ async function saveMusic() {
   const btn = document.getElementById('saveMusicBtn');
   const urlVal = document.getElementById('musicUrl').value.trim();
   if (!urlVal && !musicBlob) { toast('Pilih file atau masukkan URL'); return; }
+  
   btn.disabled = true; btn.textContent = 'Menyimpan...';
   let finalUrl = urlVal;
+  
   try {
-    if (musicBlob && !urlVal) { finalUrl = await new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = err => rej(err); r.readAsDataURL(musicBlob); }); }
-    const { error } = await db.from('settings').upsert({ key:'music_url', value:finalUrl, updated_at:new Date().toISOString() },{ onConflict:'key' });
-    if (error) { if (error.message.includes('value too long')) { toast('Gagal: File Base64 terlalu besar. Gunakan URL.'); } else { throw error; } return; }
-    toast('Musik disimpan 🎵'); clearMusicFile(); document.getElementById('musicUrl').value = ''; loadMusicSettings();
-  } catch (err) { console.error(err); toast('Gagal menyimpan musik.'); } finally { btn.disabled = false; btn.textContent = 'Simpan'; }
+    // Jika user memasukkan link URL manual
+    if (urlVal) {
+      const { error } = await db.from('settings').upsert({ key:'music_url', value:finalUrl, updated_at:new Date().toISOString() },{ onConflict:'key' });
+      if (error) throw error;
+      toast('Musik disimpan 🎵'); 
+      clearMusicFile(); 
+      document.getElementById('musicUrl').value = ''; 
+      loadMusicSettings();
+    } 
+    // Jika user upload file dari komputer (Simpan ke Supabase Storage)
+    else if (musicBlob) {
+      toast('Mengupload file... Tunggu sebentar');
+      const fileName = 'musik_undangan_' + Date.now() + '.mp3';
+      
+      // Upload file ke Supabase Storage (Bucket "musik")
+      const { data: uploadData, error: uploadError } = await db.storage
+        .from('musik') // Pastikan bucket "musik" sudah dibuat di Supabase dan di-set Public!
+        .upload(fileName, musicBlob, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) {
+        toast('Gagal upload: ' + uploadError.message);
+        throw uploadError;
+      }
+
+      // Ambil link publik dari file yang baru saja diupload
+      const { data: urlData } = db.storage.from('musik').getPublicUrl(fileName);
+      finalUrl = urlData.publicUrl;
+
+      // Simpan link publik tersebut ke database Supabase
+      const { error } = await db.from('settings').upsert({ key:'music_url', value:finalUrl, updated_at:new Date().toISOString() },{ onConflict:'key' });
+      if (error) throw error;
+      
+      toast('Musik berhasil diupload & disimpan 🎵'); 
+      clearMusicFile(); 
+      loadMusicSettings();
+    }
+  } catch (err) { 
+    console.error(err); 
+    toast('Gagal menyimpan musik.'); 
+  } finally { 
+    btn.disabled = false; btn.textContent = 'Simpan'; 
+  }
 }
 
 async function removeMusic() {
