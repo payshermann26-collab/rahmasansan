@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Undangan Sansan & Rahma</title>
+<title>Undangan Sansan & Rahma</title>
+<!-- Tailwind CDN hanya untuk development. Untuk production gunakan: npm install -D tailwindcss -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -291,7 +292,7 @@ tr:last-child td { border-bottom: none; }
 const SUPABASE_URL  = 'https://usgqptxcpudatklkhucs.supabase.co';
 const SUPABASE_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ3FwdHhjcHVkYXRrbGtodWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1ODk2MzMsImV4cCI6MjA5MjE2NTYzM30.il3v1knHRKNPTYnS9Uhz6RgM50-TCzzCXTO2tGqWuKw';
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const BASE = window.location.origin + window.location.pathname.replace('admin.html','index.html');
+const BASE = window.location.origin + '/';
 
 /* ── HELPERS ── */
 function escapeHtml(str) {
