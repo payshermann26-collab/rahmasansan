@@ -305,7 +305,14 @@
             <p class="text-base text-[#3a5a6a] reveal delay-6">Sabtu, 06 Juni 2026</p>
 
             <div class="absolute bottom-6 left-1/2 -translate-x-1/2 reveal delay-8">
-                
+                <div class="flex flex-col items-center gap-2 text-[#4A7DB5]" style="opacity:0.4">
+                    <span class="text-[10px] tracking-[0.2em] uppercase">Scroll</span>
+                    <div class="scroll-indicator">
+                        <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 4 L8 18 M3 14 L8 20 L13 14"/>
+                        </svg>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -710,18 +717,12 @@
     const guest = urlParams.get('to');
     const guestParam = guest ? decodeURIComponent(guest) : null;
     
+    // PERUBAHAN: Jika ada nama tamu, tampilkan elemen nama tamu (font Cabin) tanpa menyembunyikan teks Bapak/Ibu
     if (guestParam) { 
-        // Sembunyikan teks default, tampilkan nama tamu dengan font besar
-        document.getElementById('guestNameDefault').style.display = 'none'; 
-        const nameEl = document.getElementById('guestName');
+        const nameEl = document.getElementById('guestName'); 
         nameEl.textContent = guestParam; 
-        nameEl.style.display = 'block';
-        // Isi otomatis ke form RSVP
-        document.getElementById('rsvpName').value = guestParam; 
-    } else {
-        // Jika tidak ada, biarkan teks Bapak/Ibu/Saudara/i tampil (font kecil)
-        document.getElementById('guestNameDefault').style.display = 'block'; 
-        document.getElementById('guestName').style.display = 'none';
+        nameEl.style.display = 'block'; // Tampilkan elemen nama tamu
+        document.getElementById('rsvpName').value = guestParam; // Isi form RSVP
     }
 
     document.getElementById('rsvpForm').addEventListener('submit', async function(e) {
