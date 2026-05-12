@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Undangan Sansan & Rahma</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 * { box-sizing: border-box; }
@@ -295,16 +295,27 @@ const BASE = window.location.origin + window.location.pathname.replace('admin.ht
 // Ganti password ini sesuai keinginan Anda
 const ADMIN_PASSWORD = 'admin123'; 
 
-function loginAdmin() {
+async function initDatabase() {
+  if (!window.supabase) throw new Error('Supabase JS tidak ditemukan. Pastikan script CDN sudah termuat.');
+  db = supabase.createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+  const { data, error } = await db.from('rsvp').select('id').limit(1);
+  if (error) throw error;
+  return data;
+}
+
+async function loginAdmin() {
   const passInput = document.getElementById('adminPass').value;
   if (passInput === ADMIN_PASSWORD) {
-    // Inisialisasi koneksi Supabase menggunakan Service Role Key
-    db = supabase.createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-    
-    document.getElementById('loginPage').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'block';
-    loadStats(); // Load awal
-    toast('Login berhasil! 💙');
+    try {
+      await initDatabase();
+      document.getElementById('loginPage').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'block';
+      await loadStats(); // Load awal
+      toast('Login berhasil! 💙');
+    } catch (err) {
+      console.error('Supabase connection failed:', err);
+      toast('Koneksi Supabase gagal: ' + (err.message || err));
+    }
   } else {
     toast('Password salah!');
   }
