@@ -198,25 +198,21 @@
         @keyframes scrollBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
         .scroll-indicator { animation: scrollBounce 1.5s ease-in-out infinite; }
 
-        /* PERUBahan: Border dihilangkan, diberi shadow tipis agar tetap elegan */
         .couple-photo-frame {
             width: 140px; height: 140px; border-radius: 50%; overflow: hidden;
-            border: none; /* Garis tepi dihapus agar tidak kelihatan */
+            border: none; 
             background: #ffffff; 
-            box-shadow: 0 4px 20px rgba(74,125,181,0.08); /* Bayangan tipis pengganti border */
+            box-shadow: 0 4px 20px rgba(74,125,181,0.08); 
             margin: 0 auto 1.25rem; position: relative;
         }
         .couple-photo-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;}
         .couple-photo-frame .fallback-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-
-        .couple-flower-decor { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; opacity: 0.8; border: 3px solid rgba(74,125,181,0.1); }
 
         @media (max-width: 768px) {
             .countdown-item { padding: 12px 14px; min-width: 65px; }
             .countdown-num { font-size: 1.5rem; }
             .timeline-line { left: 20px; }
             .couple-photo-frame { width: 110px; height: 110px; }
-            .couple-flower-decor { width: 60px; height: 60px; }
         }
     </style>
 </head>
@@ -249,7 +245,14 @@
         <p class="text-sm text-[#3a5a6a] mb-1" style="animation: fadeIn 1s ease 1.1s both;">Sabtu, 06 Juni 2026</p>
         <div class="ornament-line mx-auto mb-7" style="animation: fadeIn 1s ease 1.2s both;"></div>
 
-        <p class="text-sm text-[#3a5a6a] mb-5" style="animation: fadeIn 1s ease 1.3s both;">Kepada Yth.<br><span class="text-[#1a3a5c] font-semibold text-base" id="guestName">Bapak/Ibu/Saudara/i</span></p>
+        <!-- PERUBAHAN: Tulisan default kecil, nama tamu yang di-input jadi besar -->
+        <div class="mb-5" style="animation: fadeIn 1s ease 1.3s both;">
+            <p class="text-xs text-[#5a7a8a] tracking-[0.2em] uppercase mb-2">Kepada Yth.</p>
+            <!-- Teks default (jika tidak ada nama tamu) -->
+            <p class="text-sm text-[#3a5a6a]" id="guestNameDefault">Bapak/Ibu/Saudara/i</p>
+            <!-- Nama tamu yang di-input dari Admin (disembunyikan default, font besar) -->
+            <p class="font-inspiration text-2xl md:text-3xl text-[#1a3a5c]" id="guestName" style="display: none;"></p>
+        </div>
 
         <button id="openBtn" class="btn-blue" style="animation: bounceInScale 0.8s ease 1.5s both;">
             <span class="flex items-center gap-2"><i data-lucide="mail-open" class="w-4 h-4"></i> Buka Undangan</span>
@@ -386,10 +389,8 @@
                 </div>
             </div>
 
-            <!-- Bunga Pemanis di bawah Nama Pengantin -->
-            <div class="flex justify-center mt-12 reveal-bounce delay-3">
-                <img src="https://z-cdn-media.chatglm.cn/files/e8f38646-1521-447f-a91d-fcbb8f392174.jpg?auth_key=1878616257-a54deb0baeb1413394d0c244ede37686-0-5079e0a72f9592f0f038c3f2f7ac9a46" class="couple-flower-decor" alt="Bunga Pemanis">
-            </div>
+            <!-- BUNGA DI BAWAH PENGANTIN SUDAH DIHILANGKAN SESUAI PERMINTAAN -->
+            
         </div>
     </section>
 
@@ -711,10 +712,24 @@
         el.classList.add('selected'); el.querySelector('i').style.color = '#4A7DB5'; selectedRSVP = el.dataset.value;
     }
 
+    // ===== LOGIKA NAMA TAMU =====
     const urlParams = new URLSearchParams(window.location.search);
     const guest = urlParams.get('to');
     const guestParam = guest ? decodeURIComponent(guest) : null;
-    if (guestParam) { document.getElementById('guestName').textContent = guestParam; document.getElementById('rsvpName').value = guestParam; }
+    
+    if (guestParam) { 
+        // Sembunyikan teks default, tampilkan nama tamu dengan font besar
+        document.getElementById('guestNameDefault').style.display = 'none'; 
+        const nameEl = document.getElementById('guestName');
+        nameEl.textContent = guestParam; 
+        nameEl.style.display = 'block';
+        // Isi otomatis ke form RSVP
+        document.getElementById('rsvpName').value = guestParam; 
+    } else {
+        // Jika tidak ada, biarkan teks Bapak/Ibu/Saudara/i tampil (font kecil)
+        document.getElementById('guestNameDefault').style.display = 'block'; 
+        document.getElementById('guestName').style.display = 'none';
+    }
 
     document.getElementById('rsvpForm').addEventListener('submit', async function(e) {
         e.preventDefault();
