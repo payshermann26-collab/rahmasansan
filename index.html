@@ -198,9 +198,12 @@
         @keyframes scrollBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
         .scroll-indicator { animation: scrollBounce 1.5s ease-in-out infinite; }
 
+        /* PERUBahan: Border dihilangkan, diberi shadow tipis agar tetap elegan */
         .couple-photo-frame {
             width: 140px; height: 140px; border-radius: 50%; overflow: hidden;
-            border: 4px solid rgba(74,125,181,0.15); background: rgba(74,125,181,0.03); 
+            border: none; /* Garis tepi dihapus agar tidak kelihatan */
+            background: #ffffff; 
+            box-shadow: 0 4px 20px rgba(74,125,181,0.08); /* Bayangan tipis pengganti border */
             margin: 0 auto 1.25rem; position: relative;
         }
         .couple-photo-frame img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block;}
@@ -224,11 +227,8 @@
 
 <!-- ==================== COVER ==================== -->
 <div id="cover">
-    <!-- LATAR BELAKANG BINGKAI BUNGA (GAMBAR 1) - TANPA BLUR -->
     <img src="https://z-cdn-media.chatglm.cn/files/770987d6-0cd2-49cb-8a28-e9c96198acf9.jpg?auth_key=1878620512-f2c197af3f714d1eaf20f34867157b72-0-5bad81d712ea757b2513c9b4bd6a7bbe" 
          class="absolute inset-0 w-full h-full object-cover pointer-events-none" alt="Background">
-    
-    <!-- BUNGA DI TENGAH (GAMBAR 2) - DENGAN EFEK BLEND AGAR NATURAL -->
     <img src="https://z-cdn-media.chatglm.cn/files/5a0f31e4-78ec-43b0-affa-d9d5c4109d36.jpg?auth_key=1878620512-3baa00e886af40a89c13e65caf3d9128-0-8d1200c41561a4a43d3c31ab3d739db3" 
          class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 md:w-72 pointer-events-none opacity-40" 
          style="mix-blend-mode: multiply;" alt="Center Flower">
@@ -276,8 +276,6 @@
 
     <!-- HERO (BISMILLAH) -->
     <section class="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-white via-blue-50/30 to-white">
-        
-        <!-- LATAR BELAKANG BUNGA BARU (OPACITY 10%) -->
         <img src="https://z-cdn-media.chatglm.cn/files/a5e4431c-af3f-4e48-aa11-313450c38aac.jpg?auth_key=1878619105-70ecb168ddd040af8f962ae3d535cf23-0-297a3d6746ab0898377afe312602e4ac" 
              class="absolute inset-0 w-full h-full object-cover pointer-events-none" style="opacity: 0.1;" alt="">
 
@@ -358,7 +356,7 @@
                     <div class="couple-photo-frame">
                         <img id="groomPhoto" src="" alt="Sansan Rahmat" style="display: none;">
                         <div class="fallback-icon" id="groomFallback">
-                            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#4A7DB5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4">
+                            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#4A7DB5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                             </svg>
                         </div>
@@ -374,7 +372,7 @@
                     <div class="couple-photo-frame">
                         <img id="bridePhoto" src="" alt="Rahma Amalia Putri" style="display: none;">
                         <div class="fallback-icon" id="brideFallback">
-                            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#4A7DB5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.4">
+                            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#4A7DB5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                                 <path d="M14.5 4.5C15 3 16 2 17 2c1.5 0 2.5 1.5 1.5 3-1 1.5-3 2-3 2"/>
                                 <path d="M9.5 4.5C9 3 8 2 7 2 5.5 0 4.5 1.5 5.5 3c1 1.5 3 2 3 2"/>
@@ -615,13 +613,11 @@
     const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     lucide.createIcons();
 
-    // ===== SECURITY: Escape HTML =====
     function escapeHTML(str) {
         if (!str) return '';
         return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
     }
 
-    // ===== FALLING PETALS =====
     function createPetals() {
         const container = document.getElementById('petals');
         const petalChars = ['❦', '✿', '❧', '✾', '🌸'];
@@ -636,7 +632,6 @@
     }
     createPetals();
 
-    // ===== COVER & INIT =====
     document.getElementById('openBtn').addEventListener('click', function() {
         document.getElementById('cover').classList.add('hidden-cover');
         document.getElementById('mainContent').style.display = 'block';
@@ -648,7 +643,6 @@
         }, 1200);
     });
 
-    // ===== SCROLL REVEAL =====
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); revealObserver.unobserve(entry.target); } });
     }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
@@ -665,7 +659,6 @@
     }
     window.addEventListener('scroll', checkReveal, { passive: true });
 
-    // ===== AUTO SCROLL =====
     let autoScrollInterval = null;
     const autoScrollBtn = document.getElementById('autoScrollBtn');
     function stopAutoScroll() { if (autoScrollInterval) { clearInterval(autoScrollInterval); autoScrollInterval = null; autoScrollBtn.classList.remove('active'); } }
@@ -683,7 +676,6 @@
     window.addEventListener('wheel', stopAutoScroll, { passive: true });
     window.addEventListener('touchmove', stopAutoScroll, { passive: true });
 
-    // ===== COUNTDOWN =====
     function updateCountdown() {
         const wedding = new Date('2026-06-06T08:00:00+07:00').getTime(); const diff = wedding - new Date().getTime();
         if (diff <= 0) { ['days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = '00'); return; }
@@ -694,7 +686,6 @@
     }
     updateCountdown(); setInterval(updateCountdown, 1000);
 
-    // ===== DYNAMIC COUPLE PHOTOS (FROM ADMIN) =====
     async function loadCouplePhotos() {
         const { data, error } = await db.from('settings').select('key, value').in('key', ['groom_photo_url', 'bride_photo_url']);
         if (data) {
@@ -714,7 +705,6 @@
     }
     loadCouplePhotos();
 
-    // ===== RSVP =====
     let selectedRSVP = 'hadir';
     function selectRSVP(el) {
         document.querySelectorAll('.rsvp-option').forEach(opt => { opt.classList.remove('selected'); opt.querySelector('i').style.color = '#8aabb8'; });
@@ -745,7 +735,6 @@
         selectRSVP(document.querySelector('.rsvp-option[data-value="hadir"]')); showToast('Terima kasih! Konfirmasi Anda telah diterima 💙');
     });
 
-    // ===== COPY =====
     function copyToClipboard(text, btn) {
         navigator.clipboard.writeText(text).then(() => {
             const original = btn.textContent; btn.textContent = 'Tersalin ✓'; btn.style.background = 'rgba(74,125,181,0.15)';
@@ -753,10 +742,8 @@
         }).catch(() => showToast('Gagal menyalin'));
     }
 
-    // ===== TOAST =====
     function showToast(message) { const toast = document.getElementById('toast'); toast.textContent = message; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000); }
 
-    // ===== MUSIC =====
     let musicPlaying = false, audioEl = null;
     async function initMusic() { const { data } = await db.from('settings').select('value').eq('key', 'music_url').single(); if (data?.value) { audioEl = new Audio(data.value); audioEl.loop = true; audioEl.volume = 0.5; } }
     initMusic();
@@ -766,7 +753,6 @@
         else { if (audioEl) audioEl.pause(); bars.forEach(bar => { bar.style.animation = 'none'; bar.style.height = '4px'; }); showToast('🔇 Musik dijeda'); }
     });
 
-    // ===== LOAD WISHES =====
     async function loadWishes() {
         const { data, error } = await db.from('rsvp').select('name, wish, created_at').not('wish', 'is', null).neq('wish', '').order('created_at', { ascending: false }).limit(20);
         const container = document.getElementById('wishesContainer');
