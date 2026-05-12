@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Undangan Pernikahan Sansan & Rahma</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; }
+body {
+  font-family: 'Afacad', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #1a2e3b;
+  font-size: 16px;
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* ── INVITATION CARD ── */
+.invitation {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 24px;
+  margin: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.invitation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+/* ── FORM STYLES ── */
+.input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e2eaf0;
+  border-radius: 12px;
+  font-family: 'Afacad', sans-serif;
+  font-size: 1rem;
+  outline: none;
+  color: #1a2e3b;
+  transition: border-color 0.2s;
+  background: #f8fbff;
+}
+
+.input:focus {
+  border-color: #667eea;
+  background: #fff;
+}
+
+.input::placeholder { color: #9ab0be; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-family: 'Afacad', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+}
+
+.btn-primary:disabled {
+  background: #a0b8d0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── RADIO BUTTONS ── */
+.radio-group {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.radio-option {
+  flex: 1;
+  padding: 12px 16px;
+  border: 2px solid #e2eaf0;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f8fbff;
+  font-weight: 600;
+  color: #6a8898;
+}
+
+.radio-option.selected {
+  border-color: #667eea;
+  background: rgba(102,126,234,0.1);
+  color: #667eea;
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  padding: 14px 24px;
+  background: #fff;
+  border: 1px solid #d0dde8;
+  border-radius: 12px;
+  color: #667eea;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(102,126,234,0.15);
+  z-index: 999;
+  transition: transform 0.35s ease;
+  white-space: nowrap;
+}
+
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.invitation {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+/* ── DECORATIVE ELEMENTS ── */
+.decorative {
+  position: absolute;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.decorative.top-right {
+  top: 20px;
+  right: 20px;
+  font-size: 2rem;
+}
+
+.decorative.bottom-left {
+  bottom: 20px;
+  left: 20px;
+  font-size: 1.5rem;
+}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════
+     INVITATION PAGE
+═══════════════════════════════════════ -->
+<div class="min-h-screen flex items-center justify-center p-4">
+  <div class="invitation max-w-md w-full">
+
+    <!-- Decorative Elements -->
+    <div class="decorative top-right">💙</div>
+    <div class="decorative bottom-left">💜</div>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="text-2xl font-bold text-[#667eea] mb-2">Undangan Pernikahan</div>
+      <div class="text-3xl font-bold text-[#1a3a5c] mb-1">Sansan & Rahma</div>
+      <div class="text-lg text-[#6a8898]">06 Juni 2026</div>
+    </div>
+
+    <!-- Guest Name -->
+    <div class="text-center mb-6">
+      <div class="text-lg font-semibold text-[#1a3a5c]" id="guestName">Kepada Yth.</div>
+      <div class="text-lg font-bold text-[#667eea]" id="guestPersonal">Tamu Undangan</div>
+    </div>
+
+    <!-- Invitation Text -->
+    <div class="text-center mb-8 text-[#2c5060] leading-relaxed">
+      <p class="mb-4">
+        Dengan memohon rahmat dan ridho Allah SWT, kami bermaksud menyelenggarakan
+        acara pernikahan putra-putri kami:
+      </p>
+
+      <div class="bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white p-4 rounded-lg mb-4">
+        <div class="font-bold text-lg mb-1">Sansan</div>
+        <div class="text-sm opacity-90">Putra dari Bapak [Nama] & Ibu [Nama]</div>
+      </div>
+
+      <div class="text-2xl font-bold text-[#667eea] my-2">dengan</div>
+
+      <div class="bg-gradient-to-r from-[#764ba2] to-[#667eea] text-white p-4 rounded-lg mb-4">
+        <div class="font-bold text-lg mb-1">Rahma</div>
+        <div class="text-sm opacity-90">Putri dari Bapak [Nama] & Ibu [Nama]</div>
+      </div>
+
+      <p class="mb-4">
+        Yang akan diselenggarakan pada:
+      </p>
+
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <div class="font-bold text-[#667eea]">Sabtu, 06 Juni 2026</div>
+        <div class="text-sm text-[#6a8898] mt-1">Pukul 10:00 WIB s.d. Selesai</div>
+        <div class="text-sm text-[#6a8898]">Gedung [Nama Gedung]</div>
+        <div class="text-sm text-[#6a8898]">[Alamat Lengkap]</div>
+      </div>
+    </div>
+
+    <!-- RSVP Form -->
+    <div id="rsvpForm" class="space-y-4">
+      <div class="text-center mb-4">
+        <div class="text-lg font-bold text-[#1a3a5c]">Konfirmasi Kehadiran</div>
+        <div class="text-sm text-[#6a8898]">Silakan isi form di bawah ini</div>
+      </div>
+
+      <!-- Status Selection -->
+      <div>
+        <label class="block text-sm font-semibold text-[#1a3a5c] mb-2">Apakah Anda akan hadir?</label>
+        <div class="radio-group">
+          <div class="radio-option" data-value="hadir" onclick="selectStatus('hadir')">✅ Hadir</div>
+          <div class="radio-option" data-value="tidak" onclick="selectStatus('tidak')">❌ Tidak Hadir</div>
+          <div class="radio-option" data-value="ragu" onclick="selectStatus('ragu')">🤔 Masih Ragu</div>
+        </div>
+      </div>
+
+      <!-- Guest Count -->
+      <div>
+        <label for="guestCount" class="block text-sm font-semibold text-[#1a3a5c] mb-2">Jumlah Orang yang Hadir</label>
+        <input type="number" id="guestCount" class="input" placeholder="1" min="1" max="10" value="1">
+      </div>
+
+      <!-- Name -->
+      <div>
+        <label for="rsvpName" class="block text-sm font-semibold text-[#1a3a5c] mb-2">Nama Lengkap</label>
+        <input type="text" id="rsvpName" class="input" placeholder="Masukkan nama Anda">
+      </div>
+
+      <!-- Wish -->
+      <div>
+        <label for="wish" class="block text-sm font-semibold text-[#1a3a5c] mb-2">Ucapan & Doa (Opsional)</label>
+        <textarea id="wish" class="input" rows="3" placeholder="Semoga langgeng sampai maut memisahkan..."></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <button onclick="submitRsvp()" id="submitBtn" class="btn btn-primary w-full">
+        Kirim Konfirmasi 💙
+      </button>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="hidden text-center py-8">
+      <div class="text-4xl mb-4">💙</div>
+      <div class="text-xl font-bold text-[#667eea] mb-2">Terima Kasih!</div>
+      <div class="text-[#6a8898]">Konfirmasi kehadiran Anda telah kami terima</div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center mt-8 pt-6 border-t border-[#e2eaf0]">
+      <div class="text-sm text-[#6a8898] mb-2">Merupakan suatu kehormatan dan kebahagiaan bagi kami</div>
+      <div class="text-sm text-[#6a8898]">apabila Bapak/Ibu/Saudara/i berkenan hadir</div>
+      <div class="text-xs text-[#9ab0be] mt-4">Wassalamualaikum Warahmatullahi Wabarakatuh</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Supabase configuration
+const SUPABASE_URL = 'https://usgqptxcpudatklkhucs.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ3FwdHhjcHVkYXRrbGtodWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1ODk2MzMsImV4cCI6MjA5MjE2NTYzM30.il3v1knHRKNPTYnS9Uhz6RgM50-TCzzCXTO2tGqWuKw';
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Helper functions
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Get guest name from URL parameter
+function getGuestFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('to') || 'Tamu Undangan';
+}
+
+// Status selection
+let selectedStatus = null;
+
+function selectStatus(status) {
+  selectedStatus = status;
+  document.querySelectorAll('.radio-option').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.value === status);
+  });
+}
+
+// Submit RSVP
+async function submitRsvp() {
+  if (!selectedStatus) {
+    toast('Silakan pilih status kehadiran');
+    return;
+  }
+
+  const name = document.getElementById('rsvpName').value.trim();
+  if (!name) {
+    toast('Silakan masukkan nama Anda');
+    return;
+  }
+
+  const guestCount = parseInt(document.getElementById('guestCount').value) || 1;
+  const wish = document.getElementById('wish').value.trim();
+  const guestParam = getGuestFromUrl();
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Mengirim...';
+
+  try {
+    const { error } = await db.from('rsvp').insert({
+      name: name,
+      status: selectedStatus,
+      guest_count: guestCount,
+      wish: wish || null,
+      guest_param: guestParam
+    });
+
+    if (error) {
+      console.error('RSVP Error:', error);
+      toast('Gagal mengirim konfirmasi. Silakan coba lagi.');
+      return;
+    }
+
+    // Success
+    document.getElementById('rsvpForm').classList.add('hidden');
+    document.getElementById('successMessage').classList.remove('hidden');
+    toast('Konfirmasi berhasil dikirim 💙');
+
+  } catch (err) {
+    console.error('RSVP Error:', err);
+    toast('Terjadi kesalahan. Silakan coba lagi.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Kirim Konfirmasi 💙';
+  }
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+  const guestName = getGuestFromUrl();
+  document.getElementById('guestPersonal').textContent = escapeHtml(guestName);
+
+  // Auto-fill name if it's a specific guest
+  if (guestName && guestName !== 'Tamu Undangan') {
+    document.getElementById('rsvpName').value = guestName;
+  }
+});
+</script>
+
+</body>
+</html>
