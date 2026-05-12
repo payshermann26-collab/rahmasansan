@@ -84,6 +84,8 @@ body { font-family: 'Afacad', sans-serif; background: #f0f4f8; color: #1a2e3b; f
 .prev-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f4f8; }
 .prev-row:last-child { border-bottom: none; }
 .prev-num { width: 26px; height: 26px; border-radius: 50%; background: rgba(74,125,181,0.1); color: #4A7DB5; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+.photo-preview-circle { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #e2eaf0; margin: 0 auto; display: block; background: #f0f4f8; }
 </style>
 </head>
 <body>
@@ -141,8 +143,39 @@ body { font-family: 'Afacad', sans-serif; background: #f0f4f8; color: #1a2e3b; f
 
 <!-- SETTINGS -->
 <div class="page" id="pageSettings">
-  <div class="page-header"><div><div class="page-title">Pengaturan</div><div class="page-sub">Import tamu & musik latar</div></div></div>
+  <div class="page-header"><div><div class="page-title">Pengaturan</div><div class="page-sub">Foto, Musik & Import tamu</div></div></div>
   <div class="px-4 py-5 space-y-4">
+    
+    <!-- FOTO PENGANTIN (BARU) -->
+    <div class="card space-y-4">
+      <div><p class="font-bold text-[#1a3a5c] mb-1"> Foto Pengantin</p><p class="text-sm text-[#6a8898]">Upload atau masukkan link foto mempelai pria & wanita (disarankan 1:1 / kotak).</p></div>
+      
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Pria -->
+        <div class="space-y-2 text-center">
+          <p class="text-sm font-semibold text-[#1a3a5c]">🤵 Mempelai Pria</p>
+          <img id="groomImgPrev" src="https://via.placeholder.com/100x100/e2eaf0/9ab0be?text=Pria" class="photo-preview-circle mb-2">
+          <input type="url" id="groomUrl" class="input text-sm" placeholder="Link URL foto..." oninput="if(this.value) document.getElementById('groomImgPrev').src=this.value">
+          <div class="dropzone py-3 text-xs" onclick="document.getElementById('groomFile').click()">
+            <p class="font-semibold text-[#4A7DB5]">Upload File</p>
+          </div>
+          <input type="file" id="groomFile" accept="image/*" style="display:none" onchange="handlePhotoFile(this, 'groom')">
+        </div>
+        <!-- Wanita -->
+        <div class="space-y-2 text-center">
+          <p class="text-sm font-semibold text-[#1a3a5c]">👰 Mempelai Wanita</p>
+          <img id="brideImgPrev" src="https://via.placeholder.com/100x100/e2eaf0/9ab0be?text=Wanita" class="photo-preview-circle mb-2">
+          <input type="url" id="brideUrl" class="input text-sm" placeholder="Link URL foto..." oninput="if(this.value) document.getElementById('brideImgPrev').src=this.value">
+          <div class="dropzone py-3 text-xs" onclick="document.getElementById('brideFile').click()">
+            <p class="font-semibold text-[#4A7DB5]">Upload File</p>
+          </div>
+          <input type="file" id="brideFile" accept="image/*" style="display:none" onchange="handlePhotoFile(this, 'bride')">
+        </div>
+      </div>
+      
+      <button onclick="savePhotos()" id="savePhotosBtn" class="btn btn-blue w-full">Simpan Foto Pengantin</button>
+    </div>
+
     <div class="card space-y-4">
       <div><p class="font-bold text-[#1a3a5c] mb-1">Import dari CSV</p><p class="text-sm text-[#6a8898]">Format: <code class="bg-blue-50 px-1 rounded text-[#4A7DB5]">Nama,NoHP</code></p></div>
       <button onclick="downloadTemplate()" class="btn btn-outline btn-sm w-full">⬇ Download Template CSV</button>
@@ -209,8 +242,6 @@ body { font-family: 'Afacad', sans-serif; background: #f0f4f8; color: #1a2e3b; f
 
 <script>
 const SUPABASE_URL = 'https://usgqptxcpudatklkhucs.supabase.co';
-
-// ⚠️ WAJIB GANTI DENGAN SERVICE ROLE KEY TERBARU ANDA DARI SUPABASE!
 const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ3FwdHhjcHVkYXRrbGtodWNzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjU4OTYzMywiZXhwIjoyMDkyMTY1NjMzfQ.MC_-ZzW5KZNdArDZiv_5GHQgHq2OvyB1XvYqrQVSmNY'; 
 
 let db = null; 
@@ -229,7 +260,7 @@ function waMsg(name, link) { return encodeURIComponent('Assalamualaikum Wr. Wb.\
 const waIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>`;
 
 const pages = { Home:'pageHome', Tambah:'pageTambah', Rsvp:'pageRsvp', Settings:'pageSettings' }; const btns  = { Home:'bnHome', Tambah:'bnTambah', Rsvp:'bnRsvp', Settings:'bnSettings' }; const svgs  = { Tambah:'svgTambah', Rsvp:'svgRsvp', Settings:'svgSettings' };
-function goPage(name) { Object.values(pages).forEach(id => document.getElementById(id).classList.remove('active')); document.getElementById(pages[name]).classList.add('active'); Object.entries(btns).forEach(([k,id]) => document.getElementById(id).classList.toggle('active', k === name)); Object.entries(svgs).forEach(([k,id]) => { const svg = document.getElementById(id); if (svg) svg.setAttribute('stroke', k === name ? '#4A7DB5' : '#9ab0be'); }); if (name === 'Home') loadStats(); if (name === 'Tambah') loadGuests(); if (name === 'Rsvp') loadRsvp(); if (name === 'Settings') loadMusicSettings(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function goPage(name) { Object.values(pages).forEach(id => document.getElementById(id).classList.remove('active')); document.getElementById(pages[name]).classList.add('active'); Object.entries(btns).forEach(([k,id]) => document.getElementById(id).classList.toggle('active', k === name)); Object.entries(svgs).forEach(([k,id]) => { const svg = document.getElementById(id); if (svg) svg.setAttribute('stroke', k === name ? '#4A7DB5' : '#9ab0be'); }); if (name === 'Home') loadStats(); if (name === 'Tambah') loadGuests(); if (name === 'Rsvp') loadRsvp(); if (name === 'Settings') { loadMusicSettings(); loadPhotoSettings(); } window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 async function loadStats() { const { data, error } = await db.from('rsvp').select('status'); if (error || !data) { console.error(error); return; } document.getElementById('sTotal').textContent = data.length; document.getElementById('sHadir').textContent = data.filter(r=>r.status==='hadir').length; document.getElementById('sTidak').textContent = data.filter(r=>r.status==='tidak').length; document.getElementById('sRagu').textContent = data.filter(r=>r.status==='ragu').length; }
 async function loadGuests() { const { data, error } = await db.from('guests').select('*').order('created_at',{ascending:false}); const el = document.getElementById('guestList'); if (error) { el.innerHTML = '<p class="text-center text-red-400 py-6">Gagal memuat data.</p>'; return console.error(error); } document.getElementById('guestCount').textContent = data ? '('+data.length+')' : ''; if (!data || data.length === 0) { el.innerHTML = '<p class="text-center text-[#6a8898] py-6">Belum ada tamu.</p>'; return; } el.innerHTML = data.map((g,i) => { const link = g.link || (BASE+'?to='+encodeURIComponent(g.name)); const ph = g.phone ? fmtPhone(g.phone) : ''; const wa = ph ? 'https://wa.me/'+ph+'?text='+waMsg(g.name,link) : 'https://wa.me/?text='+waMsg(g.name,link); return `<div class="guest-item"><div class="guest-name">${i+1}. ${escapeHtml(g.name)}</div><div class="guest-meta">${escapeHtml(g.phone)||'No HP'} · ${timeAgo(g.created_at)}</div><div class="guest-actions"><button class="btn btn-outline btn-sm" onclick="copyLink('${link}')">Salin Link</button><a href="${wa}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:5px;">${waIcon} Kirim WA</a><button class="btn btn-danger btn-sm" onclick="delGuest('${g.id}')">Hapus</button></div></div>`; }).join(''); }
@@ -249,6 +280,98 @@ function clearCsv() { csvRows = []; document.getElementById('csvPreview').style.
 async function importCsv() { if (!csvRows.length) return; const btn = document.getElementById('importBtn'); btn.disabled = true; btn.textContent = 'Mengimpor...'; const rows = csvRows.map(g => ({ name: g.name, phone: g.phone||null, link: BASE+'?to='+encodeURIComponent(g.name) })); const { error } = await db.from('guests').insert(rows); btn.disabled = false; btn.textContent = '⬆ Import ke Database'; if (error) { toast('Gagal: '+error.message); console.error(error); return; } toast(csvRows.length+' tamu diimport 💙'); clearCsv(); loadGuests(); }
 function downloadTemplate() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['Nama,NoHP\nBudi Santoso,08123456789\nSiti Rahayu,08987654321'],{type:'text/csv'})); a.download = 'template_tamu.csv'; a.click(); }
 
+
+/* ── FOTO PENGANTIN (BARU) ── */
+let photoBlobs = { groom: null, bride: null };
+
+function handlePhotoFile(input, type) {
+    const file = input.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast('Hanya file gambar yang diizinkan'); return; }
+    if (file.size > 5000000) { toast('File terlalu besar (Maks 5MB)'); return; }
+    
+    photoBlobs[type] = file;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        document.getElementById(type + 'ImgPrev').src = e.target.result;
+        document.getElementById(type + 'Url').value = ''; // Kosongkan input URL jika upload file
+    };
+    reader.readAsDataURL(file);
+}
+
+async function loadPhotoSettings() {
+    const { data, error } = await db.from('settings').select('key, value').in('key', ['groom_photo_url', 'bride_photo_url']);
+    if (error || !data) return;
+    
+    const groomUrl = data.find(d => d.key === 'groom_photo_url')?.value || '';
+    const brideUrl = data.find(d => d.key === 'bride_photo_url')?.value || '';
+
+    document.getElementById('groomUrl').value = groomUrl;
+    document.getElementById('groomImgPrev').src = groomUrl || 'https://via.placeholder.com/100x100/e2eaf0/9ab0be?text=Pria';
+    
+    document.getElementById('brideUrl').value = brideUrl;
+    document.getElementById('brideImgPrev').src = brideUrl || 'https://via.placeholder.com/100x100/e2eaf0/9ab0be?text=Wanita';
+}
+
+async function savePhotos() {
+    const btn = document.getElementById('savePhotosBtn');
+    const groomUrlVal = document.getElementById('groomUrl').value.trim();
+    const brideUrlVal = document.getElementById('brideUrl').value.trim();
+    
+    if (!groomUrlVal && !photoBlobs.groom && !brideUrlVal && !photoBlobs.bride) {
+        toast('Masukkan link atau upload foto terlebih dahulu!');
+        return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+    try {
+        let finalGroomUrl = groomUrlVal;
+        let finalBrideUrl = brideUrlVal;
+
+        // Proses upload jika ada file
+        if (photoBlobs.groom) {
+            toast('⏳ Upload foto pria...');
+            const fileName = 'groom_' + Date.now() + '.jpg';
+            const { data: upData, error: upErr } = await db.storage.from('images').upload(fileName, photoBlobs.groom, { cacheControl: '3600', upsert: true });
+            if (upErr) throw upErr;
+            const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
+            finalGroomUrl = urlData.publicUrl;
+        }
+
+        if (photoBlobs.bride) {
+            toast('⏳ Upload foto wanita...');
+            const fileName = 'bride_' + Date.now() + '.jpg';
+            const { data: upData, error: upErr } = await db.storage.from('images').upload(fileName, photoBlobs.bride, { cacheControl: '3600', upsert: true });
+            if (upErr) throw upErr;
+            const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
+            finalBrideUrl = urlData.publicUrl;
+        }
+
+        // Simpan ke tabel settings
+        if (finalGroomUrl) {
+            const { error: errG } = await db.from('settings').upsert({ key: 'groom_photo_url', value: finalGroomUrl, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+            if (errG) throw errG;
+        }
+
+        if (finalBrideUrl) {
+            const { error: errB } = await db.from('settings').upsert({ key: 'bride_photo_url', value: finalBrideUrl, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+            if (errB) throw errB;
+        }
+
+        toast('✅ Foto pengantin berhasil disimpan!');
+        photoBlobs = { groom: null, bride: null }; // Reset
+        loadPhotoSettings();
+
+    } catch (err) {
+        console.error(err);
+        toast('❌ Gagal menyimpan foto. Coba pakai kolom URL saja.');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Simpan Foto Pengantin';
+    }
+}
+
+
 /* ── MUSIK (DENGAN URL & STORAGE) ── */
 let musicBlob = null;
 const musicDrop = document.getElementById('musicDrop');
@@ -257,7 +380,7 @@ function handleMusicFile(input) { if(input.files[0]) setMusicFile(input.files[0]
 function setMusicFile(file) { if (!file.type.startsWith('audio/')) { toast('Hanya file audio yang diizinkan'); return; } if (file.size > 10000000) { toast('File terlalu besar (Maks 10MB)'); return; } musicBlob = file; document.getElementById('musicFileName').textContent = file.name; document.getElementById('musicPlayer').src = URL.createObjectURL(file); document.getElementById('musicFileInfo').style.display = 'block'; document.getElementById('uploadMusicBox').style.display = 'none'; document.getElementById('musicUrl').value = ''; }
 function clearMusicFile() { musicBlob = null; document.getElementById('musicFileInfo').style.display = 'none'; document.getElementById('musicFile').value = ''; document.getElementById('uploadMusicBox').style.display = 'block'; }
 
-function previewMusic() { const url = document.getElementById('musicUrl').value.trim(); if (!url && !musicBlob) { toast('Pilih file atau masukkan URL dulu'); return; } if (url) { document.getElementById('musicPlayer').src = url; document.getElementById('musicPreviewBox').style.display = 'block'; } document.getElementById('musicPlayer').play(); }
+function previewMusic() { const url = document.getElementById('musicUrl').value.trim(); if (!url && !musicBlob) { toast('Pilih file atau masukkan URL dulu'); return; } if (url) { document.getElementById('musicPlayer').src = url; } document.getElementById('musicPlayer').play(); }
 
 async function loadMusicSettings() { const { data, error } = await db.from('settings').select('value').eq('key','music_url').single(); const url = data?.value || ''; document.getElementById('currentMusicUrl').textContent = url ? url.substring(0, 80) + (url.length > 80 ? '...' : '') : ''; document.getElementById('currentMusicBox').style.display = url ? 'block' : 'none'; document.getElementById('uploadMusicBox').style.display = url ? 'none' : 'block'; if(!url) clearMusicFile(); }
 
@@ -270,24 +393,22 @@ async function saveMusic() {
   let finalUrl = urlVal;
   
   try {
-    // Opsional A: Jika user memasukkan link URL manual (seperti dari GitHub)
     if (urlVal) {
       const { error } = await db.from('settings').upsert({ key:'music_url', value:finalUrl, updated_at:new Date().toISOString() },{ onConflict:'key' });
       if (error) throw error;
       toast('✅ Musik URL berhasil disimpan!'); 
       clearMusicFile(); loadMusicSettings();
     } 
-    // Opsional B: Jika user upload file dari komputer (Simpan ke Supabase Storage)
     else if (musicBlob) {
       toast('⏳ Proses upload dimulai...');
       const fileName = 'musik_undangan_' + Date.now() + '.mp3';
       
       const { data: uploadData, error: uploadError } = await db.storage
-        .from('audio') // GANTI NAMA BUCKET JADI 'audio' UNTUK MENGHINDARI ERROR SEBELUMNYA
+        .from('audio')
         .upload(fileName, musicBlob, { cacheControl: '3600', upsert: true });
 
       if (uploadError) {
-        toast('❌ Gagal upload ke Storage. Coba pakai kolom URL GitHub saja.');
+        toast('❌ Gagal upload ke Storage. Coba pakai kolom URL saja.');
         throw uploadError;
       }
 
