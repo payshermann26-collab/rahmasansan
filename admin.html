@@ -96,8 +96,9 @@ body { font-family: 'Afacad', sans-serif; background: #f0f4f8; color: #1a2e3b; f
 <div class="login-page" id="loginPage">
   <div class="login-box">
     <div class="font-bold text-xl text-[#1a3a5c] mb-1">Admin Login</div>
-    <div class="text-sm text-[#6a8898] mb-6">Masukkan password untuk mengakses panel</div>
-    <input type="password" id="adminPass" class="input mb-4" placeholder="Password Admin">
+    <div class="text-sm text-[#6a8898] mb-6">Login aman menggunakan Supabase Auth</div>
+    <input type="email" id="adminEmail" class="input mb-3" placeholder="Email Admin">
+    <input type="password" id="adminPass" class="input mb-4" placeholder="Password">
     <button onclick="loginAdmin()" class="btn btn-blue w-full">Masuk</button>
   </div>
 </div>
@@ -242,15 +243,47 @@ body { font-family: 'Afacad', sans-serif; background: #f0f4f8; color: #1a2e3b; f
 
 <script>
 const SUPABASE_URL = 'https://usgqptxcpudatklkhucs.supabase.co';
-const SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ3FwdHhjcHVkYXRrbGtodWNzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjU4OTYzMywiZXhwIjoyMDkyMTY1NjMzfQ.MC_-ZzW5KZNdArDZiv_5GHQgHq2OvyB1XvYqrQVSmNY'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzZ3FwdHhjcHVkYXRrbGtodWNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1ODk2MzMsImV4cCI6MjA5MjE2NTYzM30.il3v1knHRKNPTYnS9Uhz6RgM50-TCzzCXTO2tGqWuKw'; 
 
-let db = null; 
+// ⚠️ KINI KITA MENGGUNAKAN ANON KEY YANG AMAN, SERVICE ROLE KEY DIHAPUS!
+let db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); 
 const BASE = window.location.origin + '/';
-const ADMIN_PASSWORD = 'admin123'; 
 
-async function initDatabase() { if (!window.supabase) throw new Error('Supabase JS tidak ditemukan.'); db = supabase.createClient(SUPABASE_URL, SERVICE_ROLE_KEY); const { data, error } = await db.from('rsvp').select('id').limit(1); if (error) throw error; return data; }
-async function loginAdmin() { const passInput = document.getElementById('adminPass').value; if (passInput === ADMIN_PASSWORD) { try { await initDatabase(); document.getElementById('loginPage').style.display = 'none'; document.getElementById('appContainer').style.display = 'block'; await loadStats(); toast('Login berhasil! 💙'); } catch (err) { console.error(err); toast('Koneksi gagal! Pastikan Service Role Key sudah benar.'); } } else { toast('Password salah!'); } }
-document.getElementById('adminPass').addEventListener('keydown', e => { if(e.key==='Enter') loginAdmin(); });
+// ===== FUNGSI LOGIN AMAN (SUPABASE AUTH) =====
+async function loginAdmin() { 
+    const emailInput = document.getElementById('adminEmail').value;
+    const passInput = document.getElementById('adminPass').value;
+    const loginBtn = document.querySelector('.login-box .btn');
+    
+    loginBtn.disabled = true; loginBtn.textContent = 'Masuk...';
+    
+    const { data, error } = await db.auth.signInWithPassword({
+        email: emailInput,
+        password: passInput,
+    });
+    
+    loginBtn.disabled = false; loginBtn.textContent = 'Masuk';
+    
+    if (error) { 
+        toast('Login gagal! Email atau password salah.'); 
+    } else { 
+        document.getElementById('loginPage').style.display = 'none'; 
+        document.getElementById('appContainer').style.display = 'block'; 
+        await loadStats(); 
+        toast('Login berhasil! 💙'); 
+    } 
+}
+
+// Cek sesi login saat halaman dimuat
+async function checkSession() {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+        document.getElementById('loginPage').style.display = 'none'; 
+        document.getElementById('appContainer').style.display = 'block'; 
+        loadStats();
+    }
+}
+checkSession();
 
 let toastTimer; function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 4000); }
 function escapeHtml(str) { if (!str) return ''; return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
@@ -263,12 +296,10 @@ const pages = { Home:'pageHome', Tambah:'pageTambah', Rsvp:'pageRsvp', Settings:
 function goPage(name) { Object.values(pages).forEach(id => document.getElementById(id).classList.remove('active')); document.getElementById(pages[name]).classList.add('active'); Object.entries(btns).forEach(([k,id]) => document.getElementById(id).classList.toggle('active', k === name)); Object.entries(svgs).forEach(([k,id]) => { const svg = document.getElementById(id); if (svg) svg.setAttribute('stroke', k === name ? '#4A7DB5' : '#9ab0be'); }); if (name === 'Home') loadStats(); if (name === 'Tambah') loadGuests(); if (name === 'Rsvp') loadRsvp(); if (name === 'Settings') { loadMusicSettings(); loadPhotoSettings(); } window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 async function loadStats() { const { data, error } = await db.from('rsvp').select('status'); if (error || !data) { console.error(error); return; } document.getElementById('sTotal').textContent = data.length; document.getElementById('sHadir').textContent = data.filter(r=>r.status==='hadir').length; document.getElementById('sTidak').textContent = data.filter(r=>r.status==='tidak').length; document.getElementById('sRagu').textContent = data.filter(r=>r.status==='ragu').length; }
-async function loadGuests() { const { data, error } = await db.from('guests').select('*').order('created_at',{ascending:false}); const el = document.getElementById('guestList'); if (error) { el.innerHTML = '<p class="text-center text-red-400 py-6">Gagal memuat data.</p>'; return console.error(error); } document.getElementById('guestCount').textContent = data ? '('+data.length+')' : ''; if (!data || data.length === 0) { el.innerHTML = '<p class="text-center text-[#6a8898] py-6">Belum ada tamu.</p>'; return; } el.innerHTML = data.map((g,i) => { const link = g.link || (BASE+'?to='+encodeURIComponent(g.name)); const ph = g.phone ? fmtPhone(g.phone) : ''; const wa = ph ? 'https://wa.me/'+ph+'?text='+waMsg(g.name,link) : 'https://wa.me/?text='+waMsg(g.name,link); return `<div class="guest-item"><div class="guest-name">${i+1}. ${escapeHtml(g.name)}</div><div class="guest-meta">${escapeHtml(g.phone)||'No HP'} · ${timeAgo(g.created_at)}</div><div class="guest-actions"><button class="btn btn-outline btn-sm" onclick="copyLink('${link}')">Salin Link</button><a href="${wa}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:5px;">${waIcon} Kirim WA</a><button class="btn btn-danger btn-sm" onclick="delGuest('${g.id}')">Hapus</button></div></div>`; }).join(''); }
+async function loadGuests() { const { data, error } = await db.from('guests').select('*').order('created_at',{ascending:false}); const el = document.getElementById('guestList'); if (error) { el.innerHTML = '<p class="text-center text-red-400 py-6">Gagal memuat. Cek koneksi/hak akses.</p>'; return console.error(error); } document.getElementById('guestCount').textContent = data ? '('+data.length+')' : ''; if (!data || data.length === 0) { el.innerHTML = '<p class="text-center text-[#6a8898] py-6">Belum ada tamu.</p>'; return; } el.innerHTML = data.map((g,i) => { const link = g.link || (BASE+'?to='+encodeURIComponent(g.name)); const ph = g.phone ? fmtPhone(g.phone) : ''; const wa = ph ? 'https://wa.me/'+ph+'?text='+waMsg(g.name,link) : 'https://wa.me/?text='+waMsg(g.name,link); return `<div class="guest-item"><div class="guest-name">${i+1}. ${escapeHtml(g.name)}</div><div class="guest-meta">${escapeHtml(g.phone)||'No HP'} · ${timeAgo(g.created_at)}</div><div class="guest-actions"><button class="btn btn-outline btn-sm" onclick="copyLink('${link}')">Salin Link</button><a href="${wa}" target="_blank" class="btn btn-sm" style="background:#25D366;color:#fff;display:inline-flex;align-items:center;gap:5px;">${waIcon} Kirim WA</a><button class="btn btn-danger btn-sm" onclick="delGuest('${g.id}')">Hapus</button></div></div>`; }).join(''); }
 async function addGuest() { const name = document.getElementById('guestName').value.trim(); const phone = document.getElementById('guestPhone').value.trim(); if (!name) { toast('Nama tidak boleh kosong'); return; } const btn = document.getElementById('addBtn'); btn.disabled = true; btn.textContent = 'Menyimpan...'; const { error } = await db.from('guests').insert({ name, phone: phone||null, link: BASE+'?to='+encodeURIComponent(name) }); btn.disabled = false; btn.textContent = '+ Tambah Tamu'; if (error) { toast('Gagal: '+error.message); return; } document.getElementById('guestName').value = ''; document.getElementById('guestPhone').value = ''; toast('Tamu ditambahkan 💙'); loadGuests(); }
 async function delGuest(id) { if (!confirm('Hapus tamu ini?')) return; const { error } = await db.from('guests').delete().eq('id',id); if (error) { toast('Gagal menghapus'); return; } toast('Tamu dihapus'); loadGuests(); }
 function copyLink(link) { navigator.clipboard.writeText(link).then(()=>toast('Link disalin 💙')); }
-document.getElementById('guestName').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('guestPhone').focus(); });
-document.getElementById('guestPhone').addEventListener('keydown', e => { if(e.key==='Enter') addGuest(); });
 
 async function loadRsvp() { const { data, error } = await db.from('rsvp').select('*').order('created_at',{ascending:false}); const el = document.getElementById('rsvpList'); if (error) { el.innerHTML = '<p class="text-center text-red-400 py-6">Gagal memuat data.</p>'; return console.error(error); } if (!data || data.length === 0) { el.innerHTML = '<p class="text-center text-[#6a8898] py-6">Belum ada respon RSVP.</p>'; return; } const bc = { hadir:'badge-hadir', tidak:'badge-tidak', ragu:'badge-ragu' }; const bl = { hadir:'✅ Hadir', tidak:'❌ Tidak Hadir', ragu:'🤔 Masih Ragu' }; el.innerHTML = data.map((r,i) => `<div class="guest-item"><div class="flex items-start justify-between gap-2"><div><div class="guest-name">${i+1}. ${escapeHtml(r.name)}</div><div class="guest-meta">Diundang: ${escapeHtml(r.guest_param)||'—'}</div></div><span class="badge ${bc[r.status]||''}">${bl[r.status]||r.status}</span></div><div class="guest-meta mt-1">👥 ${r.guest_count||1} orang · ${timeAgo(r.created_at)}</div>${r.wish ? '<div class="mt-2 text-sm text-[#2c5060] bg-blue-50 rounded-lg px-3 py-2">"'+escapeHtml(r.wish)+'"</div>' : ''}<div class="guest-actions mt-2 justify-end"><button class="btn btn-danger btn-sm" onclick="delRsvp('${r.id}')">Hapus</button></div></div>`).join(''); }
 async function delRsvp(id) { if (!confirm('Hapus data RSVP ini?')) return; const { error } = await db.from('rsvp').delete().eq('id',id); if (error) { toast('Gagal menghapus'); return; } toast('RSVP dihapus'); loadRsvp(); loadStats(); }
@@ -280,154 +311,22 @@ function clearCsv() { csvRows = []; document.getElementById('csvPreview').style.
 async function importCsv() { if (!csvRows.length) return; const btn = document.getElementById('importBtn'); btn.disabled = true; btn.textContent = 'Mengimpor...'; const rows = csvRows.map(g => ({ name: g.name, phone: g.phone||null, link: BASE+'?to='+encodeURIComponent(g.name) })); const { error } = await db.from('guests').insert(rows); btn.disabled = false; btn.textContent = '⬆ Import ke Database'; if (error) { toast('Gagal: '+error.message); console.error(error); return; } toast(csvRows.length+' tamu diimport 💙'); clearCsv(); loadGuests(); }
 function downloadTemplate() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['Nama,NoHP\nBudi Santoso,08123456789\nSiti Rahayu,08987654321'],{type:'text/csv'})); a.download = 'template_tamu.csv'; a.click(); }
 
-
 /* ── FOTO PENGANTIN (BARU) ── */
 let photoBlobs = { groom: null, bride: null };
+function handlePhotoFile(input, type) { const file = input.files[0]; if (!file) return; if (!file.type.startsWith('image/')) { toast('Hanya file gambar'); return; } photoBlobs[type] = file; const reader = new FileReader(); reader.onload = (e) => { document.getElementById(type + 'ImgPrev').src = e.target.result; document.getElementById(type + 'Url').value = ''; }; reader.readAsDataURL(file); }
+async function loadPhotoSettings() { const { data, error } = await db.from('settings').select('key, value').in('key', ['groom_photo_url', 'bride_photo_url']); if (error || !data) return; const groomUrl = data.find(d => d.key === 'groom_photo_url')?.value || ''; const brideUrl = data.find(d => d.key === 'bride_photo_url')?.value || ''; document.getElementById('groomUrl').value = groomUrl; document.getElementById('groomImgPrev').src = groomUrl || 'https://via.placeholder.com/100x100/e2eaf0/9ab0be?text=Pria'; document.getElementById('brideUrl').value = brideUrl; document.getElementById('brideImgPrev').src = brideUrl || 'https://via.placeholder.com/100x100/e2eaf0/9ab0be?text=Wanita'; }
+async function savePhotos() { const btn = document.getElementById('savePhotosBtn'); const groomUrlVal = document.getElementById('groomUrl').value.trim(); const brideUrlVal = document.getElementById('brideUrl').value.trim(); if (!groomUrlVal && !photoBlobs.groom && !brideUrlVal && !photoBlobs.bride) { toast('Masukkan link/upload foto!'); return; } btn.disabled = true; btn.textContent = 'Menyimpan...'; try { let finalGroomUrl = groomUrlVal; let finalBrideUrl = brideUrlVal; if (photoBlobs.groom) { toast('⏳ Upload foto pria...'); const fileName = 'groom_' + Date.now() + '.jpg'; const { data: upData, error: upErr } = await db.storage.from('images').upload(fileName, photoBlobs.groom, { cacheControl: '3600', upsert: true }); if (upErr) throw upErr; const { data: urlData } = db.storage.from('images').getPublicUrl(fileName); finalGroomUrl = urlData.publicUrl; } if (photoBlobs.bride) { toast('⏳ Upload foto wanita...'); const fileName = 'bride_' + Date.now() + '.jpg'; const { data: upData, error: upErr } = await db.storage.from('images').upload(fileName, photoBlobs.bride, { cacheControl: '3600', upsert: true }); if (upErr) throw upErr; const { data: urlData } = db.storage.from('images').getPublicUrl(fileName); finalBrideUrl = urlData.publicUrl; } if (finalGroomUrl) { const { error: errG } = await db.from('settings').upsert({ key: 'groom_photo_url', value: finalGroomUrl, updated_at: new Date().toISOString() }, { onConflict: 'key' }); if (errG) throw errG; } if (finalBrideUrl) { const { error: errB } = await db.from('settings').upsert({ key: 'bride_photo_url', value: finalBrideUrl, updated_at: new Date().toISOString() }, { onConflict: 'key' }); if (errB) throw errB; } toast('✅ Foto disimpan!'); photoBlobs = { groom: null, bride: null }; loadPhotoSettings(); } catch (err) { console.error(err); toast('❌ Gagal menyimpan foto. Cek koneksi/hak akses.'); } finally { btn.disabled = false; btn.textContent = 'Simpan Foto Pengantin'; } }
 
-function handlePhotoFile(input, type) {
-    const file = input.files[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) { toast('Hanya file gambar yang diizinkan'); return; }
-    if (file.size > 5000000) { toast('File terlalu besar (Maks 5MB)'); return; }
-    
-    photoBlobs[type] = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        document.getElementById(type + 'ImgPrev').src = e.target.result;
-        document.getElementById(type + 'Url').value = ''; // Kosongkan input URL jika upload file
-    };
-    reader.readAsDataURL(file);
-}
-
-async function loadPhotoSettings() {
-    const { data, error } = await db.from('settings').select('key, value').in('key', ['groom_photo_url', 'bride_photo_url']);
-    if (error || !data) return;
-    
-    const groomUrl = data.find(d => d.key === 'groom_photo_url')?.value || '';
-    const brideUrl = data.find(d => d.key === 'bride_photo_url')?.value || '';
-
-    document.getElementById('groomUrl').value = groomUrl;
-    document.getElementById('groomImgPrev').src = groomUrl || 'https://via.placeholder.com/100x100/e2eaf0/9ab0be?text=Pria';
-    
-    document.getElementById('brideUrl').value = brideUrl;
-    document.getElementById('brideImgPrev').src = brideUrl || 'https://via.placeholder.com/100x100/e2eaf0/9ab0be?text=Wanita';
-}
-
-async function savePhotos() {
-    const btn = document.getElementById('savePhotosBtn');
-    const groomUrlVal = document.getElementById('groomUrl').value.trim();
-    const brideUrlVal = document.getElementById('brideUrl').value.trim();
-    
-    if (!groomUrlVal && !photoBlobs.groom && !brideUrlVal && !photoBlobs.bride) {
-        toast('Masukkan link atau upload foto terlebih dahulu!');
-        return;
-    }
-
-    btn.disabled = true; btn.textContent = 'Menyimpan...';
-
-    try {
-        let finalGroomUrl = groomUrlVal;
-        let finalBrideUrl = brideUrlVal;
-
-        // Proses upload jika ada file
-        if (photoBlobs.groom) {
-            toast('⏳ Upload foto pria...');
-            const fileName = 'groom_' + Date.now() + '.jpg';
-            const { data: upData, error: upErr } = await db.storage.from('images').upload(fileName, photoBlobs.groom, { cacheControl: '3600', upsert: true });
-            if (upErr) throw upErr;
-            const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
-            finalGroomUrl = urlData.publicUrl;
-        }
-
-        if (photoBlobs.bride) {
-            toast('⏳ Upload foto wanita...');
-            const fileName = 'bride_' + Date.now() + '.jpg';
-            const { data: upData, error: upErr } = await db.storage.from('images').upload(fileName, photoBlobs.bride, { cacheControl: '3600', upsert: true });
-            if (upErr) throw upErr;
-            const { data: urlData } = db.storage.from('images').getPublicUrl(fileName);
-            finalBrideUrl = urlData.publicUrl;
-        }
-
-        // Simpan ke tabel settings
-        if (finalGroomUrl) {
-            const { error: errG } = await db.from('settings').upsert({ key: 'groom_photo_url', value: finalGroomUrl, updated_at: new Date().toISOString() }, { onConflict: 'key' });
-            if (errG) throw errG;
-        }
-
-        if (finalBrideUrl) {
-            const { error: errB } = await db.from('settings').upsert({ key: 'bride_photo_url', value: finalBrideUrl, updated_at: new Date().toISOString() }, { onConflict: 'key' });
-            if (errB) throw errB;
-        }
-
-        toast('✅ Foto pengantin berhasil disimpan!');
-        photoBlobs = { groom: null, bride: null }; // Reset
-        loadPhotoSettings();
-
-    } catch (err) {
-        console.error(err);
-        toast('❌ Gagal menyimpan foto. Coba pakai kolom URL saja.');
-    } finally {
-        btn.disabled = false; btn.textContent = 'Simpan Foto Pengantin';
-    }
-}
-
-
-/* ── MUSIK (DENGAN URL & STORAGE) ── */
+/* ── MUSIK ── */
 let musicBlob = null;
 const musicDrop = document.getElementById('musicDrop');
 musicDrop.addEventListener('dragover', e => { e.preventDefault(); musicDrop.classList.add('over'); }); musicDrop.addEventListener('dragleave', () => musicDrop.classList.remove('over')); musicDrop.addEventListener('drop', e => { e.preventDefault(); musicDrop.classList.remove('over'); if(e.dataTransfer.files[0]) setMusicFile(e.dataTransfer.files[0]); });
 function handleMusicFile(input) { if(input.files[0]) setMusicFile(input.files[0]); }
-function setMusicFile(file) { if (!file.type.startsWith('audio/')) { toast('Hanya file audio yang diizinkan'); return; } if (file.size > 10000000) { toast('File terlalu besar (Maks 10MB)'); return; } musicBlob = file; document.getElementById('musicFileName').textContent = file.name; document.getElementById('musicPlayer').src = URL.createObjectURL(file); document.getElementById('musicFileInfo').style.display = 'block'; document.getElementById('uploadMusicBox').style.display = 'none'; document.getElementById('musicUrl').value = ''; }
+function setMusicFile(file) { if (!file.type.startsWith('audio/')) { toast('Hanya file audio'); return; } if (file.size > 10000000) { toast('File terlalu besar (Maks 10MB)'); return; } musicBlob = file; document.getElementById('musicFileName').textContent = file.name; document.getElementById('musicPlayer').src = URL.createObjectURL(file); document.getElementById('musicFileInfo').style.display = 'block'; document.getElementById('uploadMusicBox').style.display = 'none'; document.getElementById('musicUrl').value = ''; }
 function clearMusicFile() { musicBlob = null; document.getElementById('musicFileInfo').style.display = 'none'; document.getElementById('musicFile').value = ''; document.getElementById('uploadMusicBox').style.display = 'block'; }
-
 function previewMusic() { const url = document.getElementById('musicUrl').value.trim(); if (!url && !musicBlob) { toast('Pilih file atau masukkan URL dulu'); return; } if (url) { document.getElementById('musicPlayer').src = url; } document.getElementById('musicPlayer').play(); }
-
 async function loadMusicSettings() { const { data, error } = await db.from('settings').select('value').eq('key','music_url').single(); const url = data?.value || ''; document.getElementById('currentMusicUrl').textContent = url ? url.substring(0, 80) + (url.length > 80 ? '...' : '') : ''; document.getElementById('currentMusicBox').style.display = url ? 'block' : 'none'; document.getElementById('uploadMusicBox').style.display = url ? 'none' : 'block'; if(!url) clearMusicFile(); }
-
-async function saveMusic() {
-  const btn = document.getElementById('saveMusicBtn');
-  const urlVal = document.getElementById('musicUrl').value.trim();
-  if (!urlVal && !musicBlob) { toast('Pilih file atau masukkan URL dulu!'); return; }
-  
-  btn.disabled = true; btn.textContent = 'Menyimpan...';
-  let finalUrl = urlVal;
-  
-  try {
-    if (urlVal) {
-      const { error } = await db.from('settings').upsert({ key:'music_url', value:finalUrl, updated_at:new Date().toISOString() },{ onConflict:'key' });
-      if (error) throw error;
-      toast('✅ Musik URL berhasil disimpan!'); 
-      clearMusicFile(); loadMusicSettings();
-    } 
-    else if (musicBlob) {
-      toast('⏳ Proses upload dimulai...');
-      const fileName = 'musik_undangan_' + Date.now() + '.mp3';
-      
-      const { data: uploadData, error: uploadError } = await db.storage
-        .from('audio')
-        .upload(fileName, musicBlob, { cacheControl: '3600', upsert: true });
-
-      if (uploadError) {
-        toast('❌ Gagal upload ke Storage. Coba pakai kolom URL saja.');
-        throw uploadError;
-      }
-
-      const { data: urlData } = db.storage.from('audio').getPublicUrl(fileName);
-      finalUrl = urlData.publicUrl;
-
-      const { error } = await db.from('settings').upsert({ key:'music_url', value:finalUrl, updated_at:new Date().toISOString() },{ onConflict:'key' });
-      if (error) throw error;
-      
-      toast('✅ Musik berhasil diupload!'); 
-      clearMusicFile(); loadMusicSettings();
-    }
-  } catch (err) { 
-    console.error(err); 
-  } finally { 
-    btn.disabled = false; btn.textContent = 'Simpan Musik'; 
-  }
-}
-
+async function saveMusic() { const btn = document.getElementById('saveMusicBtn'); const urlVal = document.getElementById('musicUrl').value.trim(); if (!urlVal && !musicBlob) { toast('Pilih file atau masukkan URL dulu!'); return; } btn.disabled = true; btn.textContent = 'Menyimpan...'; let finalUrl = urlVal; try { if (urlVal) { const { error } = await db.from('settings').upsert({ key:'music_url', value:finalUrl, updated_at:new Date().toISOString() },{ onConflict:'key' }); if (error) throw error; toast('✅ Musik disimpan!'); clearMusicFile(); loadMusicSettings(); } else if (musicBlob) { toast('⏳ Upload dimulai...'); const fileName = 'musik_undangan_' + Date.now() + '.mp3'; const { data: uploadData, error: uploadError } = await db.storage.from('audio').upload(fileName, musicBlob, { cacheControl: '3600', upsert: true }); if (uploadError) throw uploadError; const { data: urlData } = db.storage.from('audio').getPublicUrl(fileName); finalUrl = urlData.publicUrl; const { error } = await db.from('settings').upsert({ key:'music_url', value:finalUrl, updated_at:new Date().toISOString() },{ onConflict:'key' }); if (error) throw error; toast('✅ Musik berhasil diupload!'); clearMusicFile(); loadMusicSettings(); } } catch (err) { console.error(err); toast('❌ Gagal menyimpan musik. Cek hak akses.'); } finally { btn.disabled = false; btn.textContent = 'Simpan Musik'; } }
 async function removeMusic() { if (!confirm('Hapus musik latar?')) return; const { error } = await db.from('settings').upsert({ key:'music_url', value:'', updated_at:new Date().toISOString() },{ onConflict:'key' }); if (error) { toast('Gagal menghapus'); return; } toast('Musik dihapus'); loadMusicSettings(); }
 </script>
 </body>

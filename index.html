@@ -224,12 +224,14 @@
 
 <!-- ==================== COVER ==================== -->
 <div id="cover">
-    <!-- TUKAR POSISI: Gambar 2 sekarang di kiri atas -->
-    <img src="https://z-cdn-media.chatglm.cn/files/639e154b-b993-4a39-a4ad-2353355c1bdc.jpg?auth_key=1878554987-9845751f36a74eedb8363d3aeff79470-0-57d06d3595719aa72ed18cd6b63cb48c"
-         class="absolute top-0 left-0 w-48 md:w-72 opacity-20 pointer-events-none" style="object-fit:contain;" alt="">
-    <!-- TUKAR POSISI: Gambar 1 sekarang di kanan bawah -->
-    <img src="https://z-cdn-media.chatglm.cn/files/e156e22e-def8-43c9-b830-e5c536e013ed.jpg?auth_key=1878554987-5f5162cf17fb475a94a6529dbc40c1a2-0-ca3692927365f517e1ee74248d63ecbf"
-         class="absolute bottom-0 right-0 w-48 md:w-72 opacity-20 pointer-events-none" style="object-fit:contain; transform: scaleX(-1);" alt="">
+    <!-- LATAR BELAKANG BINGKAI BUNGA (GAMBAR 1) - TANPA BLUR -->
+    <img src="https://z-cdn-media.chatglm.cn/files/770987d6-0cd2-49cb-8a28-e9c96198acf9.jpg?auth_key=1878620512-f2c197af3f714d1eaf20f34867157b72-0-5bad81d712ea757b2513c9b4bd6a7bbe" 
+         class="absolute inset-0 w-full h-full object-cover pointer-events-none" alt="Background">
+    
+    <!-- BUNGA DI TENGAH (GAMBAR 2) - DENGAN EFEK BLEND AGAR NATURAL -->
+    <img src="https://z-cdn-media.chatglm.cn/files/5a0f31e4-78ec-43b0-affa-d9d5c4109d36.jpg?auth_key=1878620512-3baa00e886af40a89c13e65caf3d9128-0-8d1200c41561a4a43d3c31ab3d739db3" 
+         class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-56 md:w-72 pointer-events-none opacity-40" 
+         style="mix-blend-mode: multiply;" alt="Center Flower">
 
     <div class="text-center px-6 relative z-10" style="padding: 40px;">
         <div class="corner-ornament corner-tl"></div>
@@ -278,13 +280,6 @@
         <!-- LATAR BELAKANG BUNGA BARU (OPACITY 10%) -->
         <img src="https://z-cdn-media.chatglm.cn/files/a5e4431c-af3f-4e48-aa11-313450c38aac.jpg?auth_key=1878619105-70ecb168ddd040af8f962ae3d535cf23-0-297a3d6746ab0898377afe312602e4ac" 
              class="absolute inset-0 w-full h-full object-cover pointer-events-none" style="opacity: 0.1;" alt="">
-
-        <!-- TUKAR POSISI: Gambar 2 sekarang di kiri atas -->
-        <img src="https://z-cdn-media.chatglm.cn/files/639e154b-b993-4a39-a4ad-2353355c1bdc.jpg?auth_key=1878554987-9845751f36a74eedb8363d3aeff79470-0-57d06d3595719aa72ed18cd6b63cb48c"
-             class="absolute top-0 left-0 w-56 md:w-80 opacity-20 pointer-events-none" style="object-fit:contain;" alt="">
-        <!-- TUKAR POSISI: Gambar 1 sekarang di kanan bawah -->
-        <img src="https://z-cdn-media.chatglm.cn/files/e156e22e-def8-43c9-b830-e5c536e013ed.jpg?auth_key=1878554987-5f5162cf17fb475a94a6529dbc40c1a2-0-ca3692927365f517e1ee74248d63ecbf"
-             class="absolute bottom-0 right-0 w-56 md:w-80 opacity-20 pointer-events-none" style="object-fit:contain; transform: scaleX(-1) scaleY(-1);" alt="">
 
         <div class="text-center px-6 py-20 relative z-10" style="padding: 60px 24px;">
             <div class="corner-ornament corner-tl"></div>
