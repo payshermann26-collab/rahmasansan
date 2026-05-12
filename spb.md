@@ -1,0 +1,1 @@
+https://usgqptxcpudatklkhucs.supabase.co
