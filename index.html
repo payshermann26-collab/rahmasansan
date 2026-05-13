@@ -770,24 +770,75 @@ if (guestParam) {
     document.getElementById('rsvpName').value = guestParam;
 }
 
-    document.getElementById('rsvpForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const name = document.getElementById('rsvpName').value.trim(); const wish = document.getElementById('rsvpWish').value.trim();
-        const count = parseInt(document.getElementById('rsvpCount').value) || 1; if (!name) return;
-        const submitBtn = this.querySelector('button[type="submit"]'); submitBtn.disabled = true; submitBtn.textContent = 'Mengirim...';
-        const { error } = await db.from('rsvp').insert({ name, status: selectedRSVP, guest_count: count, wish: wish || null, guest_param: guestParam || null });
-        submitBtn.disabled = false; submitBtn.textContent = 'Kirim Konfirmasi';
-        if (error) { showToast('Gagal mengirim, coba lagi 😢'); console.error(error); return; }
-        if (wish) {
-            const entry = document.createElement('div'); entry.className = 'guest-entry-dark';
-            entry.style.animation = 'bounceInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both';
-            entry.innerHTML = `<div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-white">${escapeHTML(name)}</span><span class="text-xs text-slate-400">Baru saja</span></div><p class="text-sm text-slate-300">${escapeHTML(wish)}</p>`;
-            document.getElementById('wishesContainer').insertBefore(entry, document.getElementById('wishesContainer').firstChild);
-        }
-        this.reset(); document.getElementById('rsvpCount').value = '1';
-        if (guestParam) document.getElementById('rsvpName').value = guestParam;
-        selectRSVP(document.querySelector('.rsvp-option[data-value="hadir"]')); showToast('Terima kasih! Konfirmasi Anda telah diterima 💙');
+   document.getElementById('rsvpForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const name = document.getElementById('rsvpName').value.trim(); 
+    const wish = document.getElementById('rsvpWish').value.trim();
+    const count = parseInt(document.getElementById('rsvpCount').value) || 1; 
+    
+    if (!name) return;
+    
+    const submitBtn = this.querySelector('button[type="submit"]'); 
+    submitBtn.disabled = true; 
+    submitBtn.textContent = 'Mengecek...';
+
+    // ===== TAMBAHAN: CEK DUPLIKAT RSVP =====
+    let checkQuery = db.from('rsvp').select('id').limit(1);
+    
+    if (guestParam) {
+        // Jika ada parameter ?to=, cek berdasarkan parameter tersebut
+        checkQuery = checkQuery.eq('guest_param', guestParam);
+    } else {
+        // Jika tidak ada parameter, cek berdasarkan nama yang diinput
+        checkQuery = checkQuery.eq('name', name);
+    }
+
+    const { data: existing } = await checkQuery;
+
+    if (existing && existing.length > 0) {
+        showToast('Anda sudah mengirim konfirmasi sebelumnya 😊');
+        submitBtn.disabled = false; 
+        submitBtn.textContent = 'Kirim Konfirmasi';
+        return; // Berhenti di sini, tidak jadi insert
+    }
+    // ===== AKHIR DARI CEK DUPLIKAT =====
+
+    submitBtn.textContent = 'Mengirim...'; // Ganti teks lagi saat mulai simpan
+
+    // Ini adalah kode insert Anda yang lama (tetap berjalan jika lolos cek duplikat)
+    const { error } = await db.from('rsvp').insert({ 
+        name, 
+        status: selectedRSVP, 
+        guest_count: count, 
+        wish: wish || null, 
+        guest_param: guestParam || null 
     });
+    
+    submitBtn.disabled = false; 
+    submitBtn.textContent = 'Kirim Konfirmasi';
+    
+    if (error) { 
+        showToast('Gagal mengirim, coba lagi 😢'); 
+        console.error(error); 
+        return; 
+    }
+    
+    // Jika berhasil, tampilkan ucapan langsung
+    if (wish) {
+        const entry = document.createElement('div'); 
+        entry.className = 'guest-entry-dark';
+        entry.style.animation = 'bounceInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both';
+        entry.innerHTML = `<div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-white">${escapeHTML(name)}</span><span class="text-xs text-slate-400">Baru saja</span></div><p class="text-sm text-slate-300">${escapeHTML(wish)}</p>`;
+        document.getElementById('wishesContainer').insertBefore(entry, document.getElementById('wishesContainer').firstChild);
+    }
+    
+    // Reset form
+    this.reset(); 
+    document.getElementById('rsvpCount').value = '1';
+    if (guestParam) document.getElementById('rsvpName').value = guestParam;
+    selectRSVP(document.querySelector('.rsvp-option[data-value="hadir"]')); 
+    showToast('Terima kasih! Konfirmasi Anda telah diterima 💙');
+});
 
     function copyToClipboard(text, btn) {
         navigator.clipboard.writeText(text).then(() => {
