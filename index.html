@@ -9,6 +9,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Arizonia&family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
+
+/* TAMBAHKAN PROPERTI BARU DI SINI */
+        html { 
+            overscroll-behavior: none; 
+            -webkit-overflow-scrolling: touch; 
+            overflow-y: scroll; 
+        }
+        
+        body { font-family: 'Afacad', sans-serif; background: #ffffff; color: #2c3e50; overflow-x: hidden; overscroll-behavior: none; }
+        /* ... sisa CSS Anda di bawah ini ... */
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { overscroll-behavior: none; }
         body { font-family: 'Afacad', sans-serif; background: #ffffff; color: #2c3e50; overflow-x: hidden; overscroll-behavior: none; }
@@ -655,24 +666,47 @@
     }
     window.addEventListener('scroll', checkReveal, { passive: true });
 
-    let autoScrollInterval = null;
-    const autoScrollBtn = document.getElementById('autoScrollBtn');
-    function stopAutoScroll() { if (autoScrollInterval) { clearInterval(autoScrollInterval); autoScrollInterval = null; autoScrollBtn.classList.remove('active'); } }
-    
-    autoScrollBtn.addEventListener('click', function() {
-        if (autoScrollInterval) { stopAutoScroll(); showToast('⏹ Auto scroll dihentikan'); } 
-        else {
-            // PATCHED: scroll 2px per 20ms instead of 1px for better pace
-            autoScrollInterval = setInterval(() => {
-                window.scrollBy({ top: 2, behavior: 'instant' });
-                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) { stopAutoScroll(); showToast('⏹ Auto scroll selesai'); }
-            }, 20);
-            autoScrollBtn.classList.add('active'); showToast('⏬ Auto scroll lambat aktif');
-        }
-    });
-    window.addEventListener('wheel', stopAutoScroll, { passive: true });
-    window.addEventListener('touchmove', stopAutoScroll, { passive: true });
+   let autoScrollInterval = null;
+let currentScrollPos = 0; // Tambahkan variabel untuk menyimpan posisi
+const autoScrollBtn = document.getElementById('autoScrollBtn');
 
+function stopAutoScroll() { 
+    if (autoScrollInterval) { 
+        clearInterval(autoScrollInterval); 
+        autoScrollInterval = null; 
+        autoScrollBtn.classList.remove('active'); 
+    } 
+}
+
+autoScrollBtn.addEventListener('click', function() {
+    if (autoScrollInterval) { 
+        stopAutoScroll(); 
+        showToast('⏹ Auto scroll dihentikan'); 
+    } else {
+        // Ambil posisi scroll saat ini sebelum mulai
+        currentScrollPos = window.scrollY; 
+        
+        autoScrollInterval = setInterval(() => {
+            currentScrollPos += 2; // Tambah posisi 2px
+            
+            // Gunakan scrollTo (Absolut) bukan scrollBy (Relatif)
+            window.scrollTo(0, currentScrollPos); 
+            
+            // Cek apakah sudah mencapai bawah
+            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) { 
+                stopAutoScroll(); 
+                showToast('⏹ Auto scroll selesai'); 
+            }
+        }, 20);
+        
+        autoScrollBtn.classList.add('active'); 
+        showToast('⏬ Auto scroll lambat aktif');
+    }
+});
+
+// Hentikan jika pengguna menyentuh layar atau scroll manual
+window.addEventListener('wheel', stopAutoScroll, { passive: true });
+window.addEventListener('touchmove', stopAutoScroll, { passive: true });
     function updateCountdown() {
         const wedding = new Date('2026-06-06T08:00:00+07:00').getTime(); const diff = wedding - new Date().getTime();
         if (diff <= 0) { ['days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = '00'); return; }
