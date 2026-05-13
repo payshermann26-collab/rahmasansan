@@ -9,24 +9,21 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Arizonia&family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
-
-/* TAMBAHKAN PROPERTI BARU DI SINI */
-       html { 
-    overscroll-behavior-y: auto;  /* Mengaktifkan efek bounce atas-bawah */
-    overscroll-behavior-x: none;  /* Mencegah scroll ke samping */
-} 
-body { 
-    font-family: 'Afacad', sans-serif; background: #ffffff; color: #2c3e50; overflow-x: hidden; 
-    overscroll-behavior-y: auto;  /* Mengaktifkan efek bounce atas-bawah */
-    overscroll-behavior-x: none;  /* Mencegah scroll ke samping */
-}
-        
-        
-        /* ... sisa CSS Anda di bawah ini ... */
-
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { overscroll-behavior: none; }
-        body { font-family: 'Afacad', sans-serif; background: #ffffff; color: #2c3e50; overflow-x: hidden; overscroll-behavior: none; }
+
+        html {
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior-y: auto;
+            overscroll-behavior-x: none;
+        }
+
+        body {
+            font-family: 'Afacad', sans-serif;
+            background: #ffffff;
+            color: #2c3e50;
+        }
+
         .font-serif { font-family: 'Playfair Display', serif; }
         .font-arizonia { font-family: 'Arizonia', cursive; }
         .font-inspiration { font-family: 'Great Vibes', cursive; }
@@ -89,6 +86,34 @@ body {
             100% { opacity: 1; transform: scale(1); }
         }
 
+        /* ===== ANIMASI HURUF BOUNCE ===== */
+        @keyframes letterBounce {
+            0% { opacity: 0; transform: translateY(50px) scale(0.4); }
+            30% { opacity: 1; transform: translateY(-14px) scale(1.12); }
+            50% { transform: translateY(7px) scale(0.94); }
+            70% { transform: translateY(-3px) scale(1.03); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .bounce-letter {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        .bounce-letter.visible {
+            animation: letterBounce 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .bounce-space {
+            display: inline-block;
+            width: 0.3em;
+        }
+        .letter-bounce {
+            opacity: 0;
+        }
+        .letter-bounce.split {
+            opacity: 1;
+        }
+        /* ===== AKHIR ANIMASI HURUF BOUNCE ===== */
+
         .float { animation: float 3s ease-in-out infinite; }
         
         .reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-bounce, .section-bounce { opacity: 0; transition: none; }
@@ -119,6 +144,12 @@ body {
         .ornament-line-h { width: 60px; height: 1px; background: linear-gradient(to right, transparent, rgba(74,125,181,0.4), transparent); }
         .dark-section .ornament-line { background: linear-gradient(to bottom, transparent, rgba(107,163,214,0.4), transparent); }
         .dark-section .ornament-line-h { background: linear-gradient(to right, transparent, rgba(107,163,214,0.4), transparent); }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(74,125,181,0.15), transparent);
+            margin: 0 auto;
+        }
 
         .corner-ornament { position: absolute; width: 50px; height: 50px; border-color: rgba(74,125,181,0.25); }
         .corner-tl { top:0; left:0; border-top: 1px solid; border-left: 1px solid; }
@@ -305,13 +336,15 @@ body {
             <div class="ornament-line mx-auto mb-5 reveal delay-2"></div>
             <p class="font-inspiration text-xl md:text-2xl text-[#3a5a6a] mb-3 reveal delay-2">Dengan memohon Rahmat Allah SWT</p>
 
-            <h1 class="text-5xl md:text-8xl font-arizonia mb-2 reveal-scale delay-3" style="color: #1a3a5c;">Sansan Rahmat</h1>
+            <!-- DIUBAH: reveal-scale delay-3 → letter-bounce -->
+            <h1 class="text-5xl md:text-8xl font-arizonia mb-2 letter-bounce" style="color: #1a3a5c;">Sansan Rahmat</h1>
             <div class="flex items-center justify-center gap-3 my-3 reveal-bounce delay-4">
                 <div class="ornament-line-h"></div>
                 <span class="font-inspiration text-4xl text-[#4A7DB5]">&</span>
                 <div class="ornament-line-h"></div>
             </div>
-            <h1 class="text-5xl md:text-8xl font-arizonia mb-5 reveal-scale delay-5" style="color: #1a3a5c;">Rahma Amalia Putri</h1>
+            <!-- DIUBAH: reveal-scale delay-5 → letter-bounce -->
+            <h1 class="text-5xl md:text-8xl font-arizonia mb-5 letter-bounce" style="color: #1a3a5c;">Rahma Amalia Putri</h1>
 
             <div class="ornament-line mx-auto mb-4 reveal delay-6"></div>
             <p class="text-base text-[#3a5a6a] reveal delay-6">Sabtu, 06 Juni 2026</p>
@@ -376,7 +409,8 @@ body {
                             </svg>
                         </div>
                     </div>
-                    <h3 class="text-3xl md:text-4xl font-arizonia mb-2" style="color: #1a3a5c;">Sansan Rahmat</h3>
+                    <!-- DIUBAH: font-arizonia biasa → letter-bounce -->
+                    <h3 class="text-3xl md:text-4xl font-arizonia mb-2 letter-bounce" style="color: #1a3a5c;">Sansan Rahmat</h3>
                     <div class="ornament-line-h mx-auto mb-3"></div>
                     <p class="font-inspiration text-lg text-[#4A7DB5] mb-1" style="opacity:0.6">Putra pertama dari</p>
                     <p class="text-[#2c4a5a]">Bpk. Rusmana & Ibu Iis Wartikah</p>
@@ -389,12 +423,11 @@ body {
                         <div class="fallback-icon" id="brideFallback">
                             <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#4A7DB5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                                <path d="M14.5 4.5C15 3 16 2 17 2c1.5 0 2.5 1.5 1.5 3-1 1.5-3 2-3 2"/>
-                                <path d="M9.5 4.5C9 3 8 2 7 2 5.5 0 4.5 1.5 5.5 3c1 1.5 3 2 3 2"/>
                             </svg>
                         </div>
                     </div>
-                    <h3 class="text-3xl md:text-4xl font-arizonia mb-2" style="color: #1a3a5c;">Rahma Amalia Putri</h3>
+                    <!-- DIUBAH: font-arizonia biasa → letter-bounce -->
+                    <h3 class="text-3xl md:text-4xl font-arizonia mb-2 letter-bounce" style="color: #1a3a5c;">Rahma Amalia Putri</h3>
                     <div class="ornament-line-h mx-auto mb-3"></div>
                     <p class="font-inspiration text-lg text-[#4A7DB5] mb-1" style="opacity:0.6">Putri ketiga dari</p>
                     <p class="text-[#2c4a5a]">Bpk. Tadjudin & Ibu Rita Sumiati</p>
@@ -440,22 +473,21 @@ body {
                     <div class="space-y-2 text-[#2c4a5a]">
                         <p class="flex items-center justify-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-[#4A7DB5]"></i> Sabtu, 06 Juni 2026</p>
                         <p class="flex items-center justify-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-[#4A7DB5]"></i> 08:00 WIB s/d 10:00 WIB</p>
-                        <p class="flex items-center justify-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-[#4A7DB5]"></i> Kp. Kalapatilu Rt 03 Rw 02 Desa Rancatungku dekat Sekolah SDN Rancatungku 1  </p>
+                        <p class="flex items-center justify-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-[#4A7DB5]"></i> Kp. Kalapatilu Rt 03 Rw 02 Desa Rancatungku dekat Sekolah SDN Rancatungku 1</p>
                     </div>
                 </div>
 
                 <div class="p-8 rounded-2xl border border-[rgba(74,125,181,0.08)] bg-white text-center reveal-right relative overflow-hidden" style="box-shadow: 0 4px 24px rgba(74,125,181,0.05);">
                     <div class="corner-ornament corner-tl"></div><div class="corner-ornament corner-br"></div>
                     <div class="w-14 h-14 mx-auto mb-5 rounded-full border border-[#4A7DB5]/20 flex items-center justify-center bg-[rgba(74,125,181,0.04)]">
-                        <!-- PATCHED: party-popper → sparkles -->
                         <i data-lucide="sparkles" class="w-6 h-6 text-[#4A7DB5]"></i>
                     </div>
                     <h3 class="font-arizonia text-3xl text-[#4A7DB5] mb-2">Resepsi</h3>
                     <div class="ornament-line-h mx-auto mb-5"></div>
                     <div class="space-y-2 text-[#2c4a5a]">
                         <p class="flex items-center justify-center gap-2"><i data-lucide="calendar" class="w-4 h-4 text-[#4A7DB5]"></i> Sabtu, 06 Juni 2026</p>
-                        <p class="flex items-center justify-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-[#4A7DB5]"></i> 11:00 WIB s/d Selesai </p>
-                        <p class="flex items-center justify-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-[#4A7DB5]"></i> Kp. Kalapatilu Rt 03 Rw 02 Desa Rancatungku dekat Sekolah SDN Rancatungku 1 </p>
+                        <p class="flex items-center justify-center gap-2"><i data-lucide="clock" class="w-4 h-4 text-[#4A7DB5]"></i> 11:00 WIB s/d Selesai</p>
+                        <p class="flex items-center justify-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-[#4A7DB5]"></i> Kp. Kalapatilu Rt 03 Rw 02 Desa Rancatungku dekat Sekolah SDN Rancatungku 1</p>
                     </div>
                 </div>
             </div>
@@ -533,7 +565,7 @@ body {
         <div class="max-w-xl mx-auto">
             <p class="font-inspiration text-2xl text-[#4A7DB5] mb-2 text-center reveal" style="opacity:0.6">Konfirmasi</p>
             <h2 class="text-3xl md:text-4xl font-serif font-semibold mb-3 text-center reveal delay-1">RSVP</h2>
-            <p class="text-sm text-[#3a5a6a] text-center mb-10 reveal delay-2">Segera Konfirmasi kehadiran Anda </p>
+            <p class="text-sm text-[#3a5a6a] text-center mb-10 reveal delay-2">Segera Konfirmasi kehadiran Anda</p>
             <form id="rsvpForm" class="space-y-4 reveal delay-3">
                 <input type="text" class="form-input" placeholder="Nama Lengkap" required id="rsvpName">
                 <div class="flex gap-3">
@@ -592,7 +624,7 @@ body {
             <div class="gift-card text-center mt-6 reveal delay-4">
                 <i data-lucide="gift" class="w-8 h-8 text-[#4A7DB5]/30 mx-auto mb-3"></i>
                 <h4 class="text-sm font-semibold mb-1">Kirim Hadiah</h4>
-                <p class="text-sm text-[#3a5a6a] mb-1">Kp. Kalapatilu Rt 03 Rw 02 Desa Rancatungku ( Dekat Sekolah SDN Rancatungku 1 ) , Sekitar Sekolah</p>
+                <p class="text-sm text-[#3a5a6a] mb-1">Kp. Kalapatilu Rt 03 Rw 02 Desa Rancatungku (Dekat Sekolah SDN Rancatungku 1), Sekitar Sekolah</p>
                 <p class="text-sm text-[#3a5a6a] mt-2">a.n. Sansan Rahmat</p>
             </div>
         </div>
@@ -608,7 +640,8 @@ body {
             <p class="text-sm text-[#3a5a6a] mb-3 reveal delay-2">apakah Bapak/Ibu/Saudara/i berkenan hadir</p>
             <p class="text-sm text-[#3a5a6a] mb-6 reveal delay-3">untuk memberikan doa restu kepada kami.</p>
             <p class="font-inspiration text-xl text-[#4A7DB5] mb-4 reveal delay-4" style="opacity:0.5">Kami Yang Berbahagia</p>
-            <h2 class="font-arizonia text-4xl md:text-6xl mb-2 reveal-scale delay-5" style="color: #1a3a5c;">Sansan & Rahma</h2>
+            <!-- DIUBAH: reveal-scale → letter-bounce -->
+            <h2 class="font-arizonia text-4xl md:text-6xl mb-2 letter-bounce" style="color: #1a3a5c;">Sansan & Rahma</h2>
             <div class="ornament-line mx-auto mt-6 mb-5 reveal delay-6"></div>
             <p class="text-sm text-[#3a5a6a] reveal delay-7">Wassalamu'alaikum Warahmatullahi Wabarakatuh</p>
             <div class="mt-10 reveal delay-8"><p class="text-xs text-[#4A7DB5]" style="opacity:0.5">Made with 💙</p></div>
@@ -643,6 +676,48 @@ body {
     }
     createPetals();
 
+    // ===== ANIMASI HURUF BOUNCE =====
+    function splitTextToLetters(element) {
+        const text = element.textContent;
+        element.innerHTML = '';
+        element.classList.add('split');
+
+        [...text].forEach((char, index) => {
+            if (char === ' ') {
+                const space = document.createElement('span');
+                space.className = 'bounce-space';
+                space.innerHTML = '&nbsp;';
+                element.appendChild(space);
+            } else {
+                const span = document.createElement('span');
+                span.className = 'bounce-letter';
+                span.textContent = char;
+                span.style.animationDelay = (index * 0.045) + 's';
+                element.appendChild(span);
+            }
+        });
+    }
+
+    function initLetterBounce() {
+        const targets = document.querySelectorAll('.letter-bounce');
+
+        const letterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const letters = entry.target.querySelectorAll('.bounce-letter');
+                    letters.forEach(letter => letter.classList.add('visible'));
+                    letterObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        targets.forEach(el => {
+            splitTextToLetters(el);
+            letterObserver.observe(el);
+        });
+    }
+    // ===== AKHIR ANIMASI HURUF BOUNCE =====
+
     document.getElementById('openBtn').addEventListener('click', function() {
         document.getElementById('cover').classList.add('hidden-cover');
         document.getElementById('mainContent').style.display = 'block';
@@ -650,7 +725,9 @@ body {
         document.getElementById('autoScrollBtn').style.display = 'flex';
         setTimeout(() => {
             document.getElementById('cover').style.display = 'none';
-            initRevealObserver(); checkReveal();
+            initRevealObserver();
+            checkReveal();
+            initLetterBounce(); // ← DIPANGGIL DI SINI
         }, 1200);
     });
 
@@ -670,48 +747,41 @@ body {
     }
     window.addEventListener('scroll', checkReveal, { passive: true });
 
-   let autoScrollInterval = null;
-let currentScrollPos = 0; // Tambahkan variabel untuk menyimpan posisi
-const autoScrollBtn = document.getElementById('autoScrollBtn');
+    let autoScrollInterval = null;
+    let currentScrollPos = 0;
+    const autoScrollBtn = document.getElementById('autoScrollBtn');
 
-function stopAutoScroll() { 
-    if (autoScrollInterval) { 
-        clearInterval(autoScrollInterval); 
-        autoScrollInterval = null; 
-        autoScrollBtn.classList.remove('active'); 
-    } 
-}
-
-autoScrollBtn.addEventListener('click', function() {
-    if (autoScrollInterval) { 
-        stopAutoScroll(); 
-        showToast('⏹ Auto scroll dihentikan'); 
-    } else {
-        // Ambil posisi scroll saat ini sebelum mulai
-        currentScrollPos = window.scrollY; 
-        
-        autoScrollInterval = setInterval(() => {
-            currentScrollPos += 2; // Tambah posisi 2px
-            
-            // Gunakan scrollTo (Absolut) bukan scrollBy (Relatif)
-            window.scrollTo(0, currentScrollPos); 
-            
-            // Cek apakah sudah mencapai bawah
-            if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) { 
-                stopAutoScroll(); 
-                showToast('⏹ Auto scroll selesai'); 
-            }
-        }, 20);
-        
-        autoScrollBtn.classList.add('active'); 
-        showToast('⏬ Auto scroll lambat aktif');
+    function stopAutoScroll() {
+        if (autoScrollInterval) {
+            clearInterval(autoScrollInterval);
+            autoScrollInterval = null;
+            autoScrollBtn.classList.remove('active');
+        }
     }
-});
 
-// Hentikan jika pengguna menyentuh layar atau scroll manual
-window.addEventListener('wheel', stopAutoScroll, { passive: true });
-window.addEventListener('touchmove', stopAutoScroll, { passive: true });
-window.addEventListener('touchstart', stopAutoScroll, { passive: true }); // ← TAMBAHKAN BARIS INI
+    autoScrollBtn.addEventListener('click', function() {
+        if (autoScrollInterval) {
+            stopAutoScroll();
+            showToast('⏹ Auto scroll dihentikan');
+        } else {
+            currentScrollPos = window.scrollY;
+            autoScrollInterval = setInterval(() => {
+                currentScrollPos += 2;
+                window.scrollTo(0, currentScrollPos);
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 5) {
+                    stopAutoScroll();
+                    showToast('⏹ Auto scroll selesai');
+                }
+            }, 20);
+            autoScrollBtn.classList.add('active');
+            showToast('⏬ Auto scroll lambat aktif');
+        }
+    });
+
+    window.addEventListener('wheel', stopAutoScroll, { passive: true });
+    window.addEventListener('touchmove', stopAutoScroll, { passive: true });
+    window.addEventListener('touchstart', stopAutoScroll, { passive: true });
+
     function updateCountdown() {
         const wedding = new Date('2026-06-06T08:00:00+07:00').getTime(); const diff = wedding - new Date().getTime();
         if (diff <= 0) { ['days','hours','minutes','seconds'].forEach(id => document.getElementById(id).textContent = '00'); return; }
@@ -722,7 +792,6 @@ window.addEventListener('touchstart', stopAutoScroll, { passive: true }); // ←
     }
     updateCountdown(); setInterval(updateCountdown, 1000);
 
-    // PATCHED: Refresh countdown when tab becomes visible again
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) updateCountdown();
     });
@@ -746,7 +815,6 @@ window.addEventListener('touchstart', stopAutoScroll, { passive: true }); // ←
     }
     loadCouplePhotos();
 
-    // PATCHED: Handle broken image URLs - show fallback again
     document.getElementById('groomPhoto').addEventListener('error', function() {
         this.style.display = 'none';
         document.getElementById('groomFallback').style.display = 'flex';
@@ -762,88 +830,80 @@ window.addEventListener('touchstart', stopAutoScroll, { passive: true }); // ←
         el.classList.add('selected'); el.querySelector('i').style.color = '#4A7DB5'; selectedRSVP = el.dataset.value;
     }
 
-   // ===== LOGIKA NAMA TAMU =====
-const urlParams = new URLSearchParams(window.location.search);
-const guest = urlParams.get('to');
-const guestParam = guest ? decodeURIComponent(guest) : null;
+    // ===== LOGIKA NAMA TAMU =====
+    const urlParams = new URLSearchParams(window.location.search);
+    const guest = urlParams.get('to');
+    const guestParam = guest ? decodeURIComponent(guest) : null;
 
-if (guestParam) { 
-    const nameEl = document.getElementById('guestName'); 
-    nameEl.textContent = guestParam; 
-    nameEl.style.display = 'block';
-    // TIDAK menyembunyikan guestNameDefault — keduanya tampil bersama
-    document.getElementById('rsvpName').value = guestParam;
-}
-
-   document.getElementById('rsvpForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const name = document.getElementById('rsvpName').value.trim(); 
-    const wish = document.getElementById('rsvpWish').value.trim();
-    const count = parseInt(document.getElementById('rsvpCount').value) || 1; 
-    
-    if (!name) return;
-    
-    const submitBtn = this.querySelector('button[type="submit"]'); 
-    submitBtn.disabled = true; 
-    submitBtn.textContent = 'Mengecek...';
-
-    // ===== TAMBAHAN: CEK DUPLIKAT RSVP =====
-    let checkQuery = db.from('rsvp').select('id').limit(1);
-    
     if (guestParam) {
-        // Jika ada parameter ?to=, cek berdasarkan parameter tersebut
-        checkQuery = checkQuery.eq('guest_param', guestParam);
-    } else {
-        // Jika tidak ada parameter, cek berdasarkan nama yang diinput
-        checkQuery = checkQuery.eq('name', name);
+        const nameEl = document.getElementById('guestName');
+        nameEl.textContent = guestParam;
+        nameEl.style.display = 'block';
+        document.getElementById('guestNameDefault').style.display = 'none'; // DIUBAH: sembunyikan teks default
+        document.getElementById('rsvpName').value = guestParam;
     }
 
-    const { data: existing } = await checkQuery;
+    document.getElementById('rsvpForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('rsvpName').value.trim();
+        const wish = document.getElementById('rsvpWish').value.trim();
+        const count = parseInt(document.getElementById('rsvpCount').value) || 1;
 
-    if (existing && existing.length > 0) {
-        showToast('Anda sudah mengirim konfirmasi sebelumnya 😊');
-        submitBtn.disabled = false; 
+        if (!name) return;
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Mengecek...';
+
+        // ===== CEK DUPLIKAT RSVP =====
+        let checkQuery = db.from('rsvp').select('id').limit(1);
+        if (guestParam) {
+            checkQuery = checkQuery.eq('guest_param', guestParam);
+        } else {
+            checkQuery = checkQuery.eq('name', name);
+        }
+        const { data: existing } = await checkQuery;
+        if (existing && existing.length > 0) {
+            showToast('Anda sudah mengirim konfirmasi sebelumnya 😊');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Kirim Konfirmasi';
+            return;
+        }
+        // ===== AKHIR CEK DUPLIKAT =====
+
+        submitBtn.textContent = 'Mengirim...';
+
+        const { error } = await db.from('rsvp').insert({
+            name,
+            status: selectedRSVP,
+            guest_count: count,
+            wish: wish || null,
+            guest_param: guestParam || null
+        });
+
+        submitBtn.disabled = false;
         submitBtn.textContent = 'Kirim Konfirmasi';
-        return; // Berhenti di sini, tidak jadi insert
-    }
-    // ===== AKHIR DARI CEK DUPLIKAT =====
 
-    submitBtn.textContent = 'Mengirim...'; // Ganti teks lagi saat mulai simpan
+        if (error) {
+            showToast('Gagal mengirim, coba lagi 😢');
+            console.error(error);
+            return;
+        }
 
-    // Ini adalah kode insert Anda yang lama (tetap berjalan jika lolos cek duplikat)
-    const { error } = await db.from('rsvp').insert({ 
-        name, 
-        status: selectedRSVP, 
-        guest_count: count, 
-        wish: wish || null, 
-        guest_param: guestParam || null 
+        if (wish) {
+            const entry = document.createElement('div');
+            entry.className = 'guest-entry-dark';
+            entry.style.animation = 'bounceInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both';
+            entry.innerHTML = `<div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-white">${escapeHTML(name)}</span><span class="text-xs text-slate-400">Baru saja</span></div><p class="text-sm text-slate-300">${escapeHTML(wish)}</p>`;
+            document.getElementById('wishesContainer').insertBefore(entry, document.getElementById('wishesContainer').firstChild);
+        }
+
+        this.reset();
+        document.getElementById('rsvpCount').value = '1';
+        if (guestParam) document.getElementById('rsvpName').value = guestParam;
+        selectRSVP(document.querySelector('.rsvp-option[data-value="hadir"]'));
+        showToast('Terima kasih! Konfirmasi Anda telah diterima 💙');
     });
-    
-    submitBtn.disabled = false; 
-    submitBtn.textContent = 'Kirim Konfirmasi';
-    
-    if (error) { 
-        showToast('Gagal mengirim, coba lagi 😢'); 
-        console.error(error); 
-        return; 
-    }
-    
-    // Jika berhasil, tampilkan ucapan langsung
-    if (wish) {
-        const entry = document.createElement('div'); 
-        entry.className = 'guest-entry-dark';
-        entry.style.animation = 'bounceInUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) both';
-        entry.innerHTML = `<div class="flex items-center justify-between mb-2"><span class="text-sm font-semibold text-white">${escapeHTML(name)}</span><span class="text-xs text-slate-400">Baru saja</span></div><p class="text-sm text-slate-300">${escapeHTML(wish)}</p>`;
-        document.getElementById('wishesContainer').insertBefore(entry, document.getElementById('wishesContainer').firstChild);
-    }
-    
-    // Reset form
-    this.reset(); 
-    document.getElementById('rsvpCount').value = '1';
-    if (guestParam) document.getElementById('rsvpName').value = guestParam;
-    selectRSVP(document.querySelector('.rsvp-option[data-value="hadir"]')); 
-    showToast('Terima kasih! Konfirmasi Anda telah diterima 💙');
-});
 
     function copyToClipboard(text, btn) {
         navigator.clipboard.writeText(text).then(() => {
