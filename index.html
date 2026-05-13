@@ -11,9 +11,17 @@
     <style>
 
 /* TAMBAHKAN PROPERTI BARU DI SINI */
-       html { overscroll-behavior: none; }
+       html { 
+    overscroll-behavior-y: auto;  /* Mengaktifkan efek bounce atas-bawah */
+    overscroll-behavior-x: none;  /* Mencegah scroll ke samping */
+} 
+body { 
+    font-family: 'Afacad', sans-serif; background: #ffffff; color: #2c3e50; overflow-x: hidden; 
+    overscroll-behavior-y: auto;  /* Mengaktifkan efek bounce atas-bawah */
+    overscroll-behavior-x: none;  /* Mencegah scroll ke samping */
+}
         
-        body { font-family: 'Afacad', sans-serif; background: #ffffff; color: #2c3e50; overflow-x: hidden; overscroll-behavior: none; }
+        
         /* ... sisa CSS Anda di bawah ini ... */
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
